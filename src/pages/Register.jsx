@@ -13,6 +13,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerAPI } from "../service/api";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import PublicFooter from "../components/PublicFooter";
 import toast from "react-hot-toast";
 
 const Register = () => {
@@ -187,6 +188,8 @@ const Register = () => {
               Resend the link
             </Link>
           </p>
+
+          <PublicFooter />
         </div>
       </div>
     </>

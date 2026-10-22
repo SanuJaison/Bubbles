@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import PublicFooter from "../components/PublicFooter";
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -172,6 +173,8 @@ const Login = () => {
               Create Account
             </Link>
           </p>
+
+          <PublicFooter />
         </div>
       </div>
     </>
