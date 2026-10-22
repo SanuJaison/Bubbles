@@ -404,6 +404,50 @@ const Home = () => {
   const voiceCompleteRef = useRef(null);
   const recordingChatRef = useRef(null);
 
+  // Native history entries let the browser Back/Forward buttons mirror the
+  // in-app back arrows. Every entry carries the view it represents, so a
+  // refresh (or a popstate) can restore the exact screen without touching
+  // `/login` again.
+  const historyIndexRef = useRef(0);
+  const initialHistoryRef = useRef({ hasState: false });
+  const initialViewAppliedRef = useRef(false);
+  const applyHistoryEntryRef = useRef(() => {});
+
+  const writeHistoryEntry = (view, chatId = null, { replace = false } = {}) => {
+    const currentState = window.history.state || {};
+    const currentView = currentState.bubblesView;
+    const currentChatId = currentState.bubblesChatId;
+
+    if (
+      !replace &&
+      currentView === view &&
+      String(currentChatId || "") === String(chatId || "")
+    ) {
+      return;
+    }
+
+    const nextIndex = replace
+      ? historyIndexRef.current
+      : historyIndexRef.current + 1;
+
+    const nextState = {
+      ...currentState,
+      bubblesView: view,
+      bubblesChatId: chatId ? String(chatId) : null,
+      bubblesIndex: nextIndex,
+    };
+
+    if (replace) {
+      window.history.replaceState(nextState, "", window.location.href);
+    } else {
+      window.history.pushState(nextState, "", window.location.href);
+    }
+
+    historyIndexRef.current = nextIndex;
+  };
+
+  const currentHistoryView = () => window.history.state?.bubblesView || "list";
+
   const {
     isRecording,
     seconds: recordingSeconds,
@@ -1168,20 +1212,68 @@ const Home = () => {
           return updatedMessages;
         });
 
-        // Reopen the conversation that was active before a refresh instead
-        // of dropping the user back on the "start a new chat" empty state.
-        const savedChatId = localStorage.getItem("activeChatId");
+        // Apply the view encoded in the current history entry exactly once.
+        // A fresh entry (for example straight after login) can restore the
+        // last chat, while a real Back navigation to the list must stay on
+        // the list even though `activeChatId` is still in localStorage.
+        if (!initialViewAppliedRef.current) {
+          initialViewAppliedRef.current = true;
 
-        const canRestoreSavedChat =
-          savedChatId &&
-          formattedChats.some(
-            (chat) => String(chat.id) === String(savedChatId),
-          );
+          const currentState = window.history.state || {};
+          const historyView = currentState.bubblesView || "list";
+          const historyChatId = currentState.bubblesChatId;
+          const savedChatId = localStorage.getItem("activeChatId");
+          const canRestoreSavedChat =
+            savedChatId &&
+            formattedChats.some(
+              (chat) => String(chat.id) === String(savedChatId),
+            );
 
-        if (canRestoreSavedChat) {
-          setSelectedConversation(savedChatId);
-          loadChatMessages(savedChatId);
-          markMessagesAsRead(savedChatId);
+          let targetChatId = null;
+
+          if (
+            historyView === "chat" &&
+            historyChatId &&
+            formattedChats.some(
+              (chat) => String(chat.id) === String(historyChatId),
+            )
+          ) {
+            targetChatId = historyChatId;
+          } else if (
+            !initialHistoryRef.current.hasState &&
+            canRestoreSavedChat
+          ) {
+            targetChatId = savedChatId;
+            writeHistoryEntry("chat", targetChatId);
+          }
+
+          if (historyView === "ai") {
+            setSelectedConversation(null);
+            setShowAIChat(true);
+            setShowMobileSidebar(false);
+            localStorage.removeItem("activeChatId");
+          } else if (historyView === "new-chat") {
+            setSelectedConversation(null);
+            setShowNewChat(true);
+            setShowMobileSidebar(true);
+            localStorage.removeItem("activeChatId");
+          } else if (targetChatId) {
+            setSelectedConversation(targetChatId);
+            localStorage.setItem("activeChatId", targetChatId);
+            loadChatMessages(targetChatId);
+            markMessagesAsRead(targetChatId);
+          } else {
+            setSelectedConversation(null);
+            setShowAIChat(false);
+            setShowNewChat(false);
+            setShowMobileSidebar(true);
+
+            if (historyView !== "list") {
+              writeHistoryEntry("list", null, { replace: true });
+            }
+
+            localStorage.removeItem("activeChatId");
+          }
         }
       }
     } catch (error) {
@@ -1190,6 +1282,44 @@ const Home = () => {
       setLoadingChats(false);
     }
   };
+
+  useEffect(() => {
+    // React StrictMode runs mount effects twice in development. The seed must
+    // only happen once, otherwise the second pass would think the list entry
+    // came from a real navigation and disable saved-chat restore.
+    if (initialHistoryRef.current.initialized) {
+      return;
+    }
+
+    const currentState = window.history.state || {};
+    const hasViewState = Boolean(currentState.bubblesView);
+
+    initialHistoryRef.current = {
+      initialized: true,
+      hasState: hasViewState,
+    };
+
+    if (hasViewState) {
+      historyIndexRef.current = Number(currentState.bubblesIndex) || 0;
+      return;
+    }
+
+    // Seed a "chat list" entry so opening a chat always has somewhere safe
+    // to return to. Login/registration replace their own entries first, so
+    // Back can never reveal an authenticated screen at `/login`.
+    window.history.replaceState(
+      {
+        ...currentState,
+        bubblesView: "list",
+        bubblesChatId: null,
+        bubblesIndex: 0,
+      },
+      "",
+      window.location.href,
+    );
+
+    historyIndexRef.current = 0;
+  }, []);
 
   useEffect(() => {
     loadMyChats();
@@ -1976,6 +2106,14 @@ const Home = () => {
       ),
     );
 
+    // Opening another chat from the list replaces the current chat entry, so
+    // one Back always lands on the chat list rather than a chain of chats.
+    writeHistoryEntry("chat", chatId, {
+      replace:
+        currentHistoryView() === "new-chat" ||
+        currentHistoryView() === "chat",
+    });
+
     setSelectedConversation(chatId);
 
     // Remember the open chat so a refresh returns to it.
@@ -2189,6 +2327,13 @@ const Home = () => {
           ];
         });
 
+        writeHistoryEntry("chat", chat._id, {
+          replace:
+            currentHistoryView() === "new-chat" ||
+            currentHistoryView() === "chat",
+        });
+        localStorage.setItem("activeChatId", chat._id);
+
         setSelectedConversation(chat._id);
 
         setShowNewChat(false);
@@ -2216,6 +2361,7 @@ const Home = () => {
   };
 
   const handleOpenAI = () => {
+    writeHistoryEntry("ai");
     setShowAIChat(true);
 
     setShowProfile(false);
@@ -2233,6 +2379,20 @@ const Home = () => {
     cancelRecording();
 
     setShowMobileSidebar(false);
+  };
+
+  const handleOpenNewChat = () => {
+    writeHistoryEntry("new-chat");
+
+    setShowNewChat(true);
+    setShowAIChat(false);
+    setShowProfile(false);
+    setShowChatMenu(false);
+    setShowEmojiPicker(false);
+
+    // On phones the new-chat picker replaces the list; on desktop the list
+    // stays visible while the picker fills the sidebar.
+    setShowMobileSidebar(true);
   };
 
   const handleTyping = (value) => {
@@ -3166,6 +3326,7 @@ const Home = () => {
       setShowProfile(false);
       setPinnedIndex(0);
       setShowMobileSidebar(true);
+      writeHistoryEntry("list", null, { replace: true });
 
       if (localStorage.getItem("activeChatId") === String(chatId)) {
         localStorage.removeItem("activeChatId");
@@ -3199,6 +3360,11 @@ const Home = () => {
       ),
     ]);
 
+    writeHistoryEntry("chat", formatted.id, {
+      replace:
+        currentHistoryView() === "new-chat" ||
+        currentHistoryView() === "chat",
+    });
     setSelectedConversation(formatted.id);
     localStorage.setItem("activeChatId", formatted.id);
     setShowNewChat(false);
@@ -4048,15 +4214,106 @@ const Home = () => {
     }
   };
 
-  const handleBackToChats = () => {
-    setShowMobileSidebar(true);
-    setShowProfile(false);
+  const applyHistoryEntry = (entry) => {
+    const view = entry?.bubblesView || "list";
+    const chatId = entry?.bubblesChatId
+      ? String(entry.bubblesChatId)
+      : null;
+
+    historyIndexRef.current = Number(entry?.bubblesIndex) || 0;
+
+    const closeTransientUi = () => {
+      setShowProfile(false);
+      setShowChatMenu(false);
+      setOpenMessageMenuId(null);
+      setMessageMenuPosition(null);
+      setShowEmojiPicker(false);
+      cancelRecording();
+    };
+
+    if (
+      view === "chat" &&
+      chatId &&
+      conversations.some((chat) => String(chat.id) === chatId)
+    ) {
+      closeTransientUi();
+      setShowNewChat(false);
+      setShowAIChat(false);
+      setSelectedConversation(chatId);
+      setShowMobileSidebar(false);
+      localStorage.setItem("activeChatId", chatId);
+      loadChatMessages(chatId);
+      markMessagesAsRead(chatId);
+      return;
+    }
+
+    if (view === "ai") {
+      closeTransientUi();
+      setSelectedConversation(null);
+      setShowNewChat(false);
+      setShowAIChat(true);
+      setShowMobileSidebar(false);
+      localStorage.removeItem("activeChatId");
+      return;
+    }
+
+    if (view === "new-chat") {
+      closeTransientUi();
+      setShowAIChat(false);
+      setShowNewChat(true);
+      setShowMobileSidebar(true);
+      return;
+    }
+
+    // Anything else is the chat list. This is also the safe fallback when a
+    // forward/back entry points at a chat that has since been deleted.
+    closeTransientUi();
     setShowNewChat(false);
     setShowAIChat(false);
-    setShowChatMenu(false);
-    setOpenMessageMenuId(null);
-    setMessageMenuPosition(null);
-    cancelRecording();
+    setSelectedConversation(null);
+    setShowMobileSidebar(true);
+    setPinnedIndex(0);
+    localStorage.removeItem("activeChatId");
+
+    if (view !== "list" || entry?.bubblesView === "chat") {
+      writeHistoryEntry("list", null, { replace: true });
+    }
+  };
+
+  // Keep the latest render's callbacks available to the single popstate
+  // listener registered below.
+  useEffect(() => {
+    applyHistoryEntryRef.current = applyHistoryEntry;
+  });
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      applyHistoryEntryRef.current(event.state);
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, []);
+
+  const handleBackToChats = () => {
+    const currentView = currentHistoryView();
+
+    // Walk the real browser history when we have our own entry behind us.
+    // The fallback handles a cold load where `/` is the first entry, so the
+    // arrow never sends the user out of the app (or back to login).
+    if (
+      currentView !== "list" &&
+      historyIndexRef.current > 0
+    ) {
+      window.history.back();
+      return;
+    }
+
+    writeHistoryEntry("list", null, { replace: true });
+    applyHistoryEntry({ bubblesView: "list", bubblesIndex: 0 });
   };
 
   const selectedMenuMessage = currentMessages.find(
@@ -4407,7 +4664,7 @@ const Home = () => {
                   onClick={() => {
                     setShowCreateGroup(false);
                     setShowFilterMenu(false);
-                    setShowNewChat(true);
+                    handleOpenNewChat();
                   }}
                   className="flex-1 py-2.5 sm:py-3 rounded-full brand-gradient text-white font-medium text-sm sm:text-base"
                 >
@@ -4440,7 +4697,7 @@ const Home = () => {
           ) : (
             <NewChatPanel
               conversations={conversations}
-              onBack={() => setShowNewChat(false)}
+              onBack={handleBackToChats}
               onSelectUser={handleSelectUser}
               onCreateGroup={() => openCreateGroup()}
             />
@@ -4455,7 +4712,7 @@ const Home = () => {
             style={{ background: activeWallpaper.background }}
           >
             {showAIChat ? (
-              <AIChat />
+              <AIChat onBack={handleBackToChats} />
             ) : selectedChat ? (
               <>
                 {/* `relative z-30` keeps the header (and its overflow menu)
@@ -5480,12 +5737,7 @@ const Home = () => {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowNewChat(true);
-                    // On narrow screens the panel lives in the sidebar, so
-                    // bring it back instead of leaving the chat pane empty.
-                    setShowMobileSidebar(true);
-                  }}
+                  onClick={handleOpenNewChat}
                   className="mt-5 px-6 py-3 rounded-full brand-gradient text-white font-medium"
                 >
                   Start a New Chat

@@ -2,6 +2,10 @@ import { Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import ChooseUsername from "./pages/ChooseUsername";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CallOverlay from "./components/CallOverlay";
@@ -42,6 +46,12 @@ function App() {
         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}/>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
+        <Route path="/choose-username" element={<ChooseUsername />} />
       </Routes>
 
       <CallOverlay />

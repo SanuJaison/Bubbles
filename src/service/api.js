@@ -8,6 +8,30 @@ export const loginAPI = async (reqBody) => {
     return await commonAPI("POST", "users/login", reqBody);
 };
 
+export const googleAuthAPI = async (reqBody) => {
+    return await commonAPI("POST", "users/google", reqBody);
+};
+
+export const chooseUsernameAPI = async (reqBody, reqHeader) => {
+    return await commonAPI("PATCH", "users/username", reqBody, reqHeader);
+};
+
+export const forgotPasswordAPI = async (reqBody) => {
+    return await commonAPI("POST", "users/forgot-password", reqBody);
+};
+
+export const resetPasswordAPI = async (reqBody) => {
+    return await commonAPI("POST", "users/reset-password", reqBody);
+};
+
+export const verifyEmailAPI = async (reqBody) => {
+    return await commonAPI("POST", "users/verify-email", reqBody);
+};
+
+export const resendVerificationAPI = async (reqBody) => {
+    return await commonAPI("POST", "users/resend-verification", reqBody);
+};
+
 export const getUserProfileAPI = async (reqHeader) => {
     return await commonAPI("GET", "users/profile", "", reqHeader);
 }

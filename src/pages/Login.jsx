@@ -6,34 +6,15 @@ import {
   LuEyeOff,
   LuArrowRight,
 } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import { loginAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext.jsx";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import toast from "react-hot-toast";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-
-  // Google renders a fixed-width iframe — keep it inside the card on phones.
-  const [googleButtonWidth, setGoogleButtonWidth] = useState(() =>
-    typeof window === "undefined"
-      ? 350
-      : Math.max(200, Math.min(350, window.innerWidth - 96)),
-  );
-
-  useEffect(() => {
-    const updateGoogleWidth = () => {
-      setGoogleButtonWidth(
-        Math.max(200, Math.min(350, window.innerWidth - 96)),
-      );
-    };
-
-    window.addEventListener("resize", updateGoogleWidth);
-
-    return () => window.removeEventListener("resize", updateGoogleWidth);
-  }, []);
 
   const [loginData, setLoginData] = useState({
     identifier: "",
@@ -66,12 +47,27 @@ const Login = () => {
 
         toast.success("Login successful");
 
-        console.log(response.data);
-
-        navigate("/");
+        // Replace the login entry instead of stacking `/` on top of it, so
+        // the browser Back button can never reveal the sign-in screen again.
+        navigate(user.needsUsername ? "/choose-username" : "/", {
+          replace: true,
+        });
       }
     } catch (error) {
-      const message = error.response?.data?.message || "Login failed";
+      const data = error.response?.data;
+      const message = data?.message || "Login failed";
+
+      if (data?.code === "EMAIL_NOT_VERIFIED") {
+        toast.error(message);
+
+        const email = data.email || (identifier.includes("@") ? identifier : "");
+
+        navigate(
+          `/verify-email${email ? `?email=${encodeURIComponent(email)}` : ""}`,
+          { replace: true },
+        );
+        return;
+      }
 
       toast.error(message);
     }
@@ -168,27 +164,7 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="flex items-center justify-center px-4 sm:px-20 py-5 gap-4">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent to-brand-200"></div>
-
-            <span className="text-sm text-muted">or</span>
-
-            <div className="h-px flex-1 bg-linear-to-l from-transparent to-brand-200"></div>
-          </div>
-
-          <div className="flex justify-center pb-5">
-            <GoogleLogin
-              width={googleButtonWidth}
-              text="continue_with"
-              shape="pill"
-              onSuccess={(credentialResponse) => {
-                console.log(credentialResponse);
-              }}
-              onError={() => {
-                console.log("Google Login Failed");
-              }}
-            />
-          </div>
+          <GoogleAuthButton />
 
           <p className="text-ink">
             Don't have an account?{" "}

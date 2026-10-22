@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import {
+  LuArrowLeft,
   LuPaperclip,
   LuSmile,
   LuSendHorizontal,
@@ -171,7 +172,7 @@ const getAttachmentKind = (file) => {
   return "file";
 };
 
-const AIChat = () => {
+const AIChat = ({ onBack }) => {
   const { resolvedTheme, chatTheme } = useTheme();
   const { user } = useAuth();
 
@@ -671,8 +672,20 @@ const AIChat = () => {
       className={`flex flex-col h-full ${chatThemeClass}`}
       style={{ background: activeWallpaper.background }}
     >
-      <div className="brand-topbar p-4 sm:p-5 flex items-center justify-between gap-3 border-b border-brand-100/70 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
+      <div className="brand-topbar px-3 sm:px-5 py-3 sm:py-5 flex items-center justify-between gap-3 border-b border-brand-100/70 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              title="Back to chats"
+              aria-label="Back to chats"
+              className="md:hidden w-9 h-9 rounded-full hover:bg-black/5 dark:hover:bg-white/10 flex items-center justify-center text-muted shrink-0 transition"
+            >
+              <LuArrowLeft className="text-xl" />
+            </button>
+          )}
+
           <div className="relative shrink-0">
             <img
               src={bubbleAI}

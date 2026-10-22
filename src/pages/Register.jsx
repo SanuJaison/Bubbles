@@ -9,33 +9,15 @@ import {
   LuShieldCheck,
   LuArrowRight,
 } from "react-icons/lu";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google";
 import { registerAPI } from "../service/api";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import toast from "react-hot-toast";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
 
-  // Google renders a fixed-width iframe — keep it inside the card on phones.
-  const [googleButtonWidth, setGoogleButtonWidth] = useState(() =>
-    typeof window === "undefined"
-      ? 350
-      : Math.max(200, Math.min(350, window.innerWidth - 96)),
-  );
-
-  useEffect(() => {
-    const updateGoogleWidth = () => {
-      setGoogleButtonWidth(
-        Math.max(200, Math.min(350, window.innerWidth - 96)),
-      );
-    };
-
-    window.addEventListener("resize", updateGoogleWidth);
-
-    return () => window.removeEventListener("resize", updateGoogleWidth);
-  }, []);
   const [userData, setUserData] = useState({
     name: "",
     username: "",
@@ -55,8 +37,13 @@ const Register = () => {
       return;
     }
 
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    if (!/[a-z]/i.test(password) || !/[0-9]/.test(password)) {
+      toast.error("Password must include at least one letter and one number");
       return;
     }
 
@@ -64,14 +51,16 @@ const Register = () => {
       const response = await registerAPI(userData);
 
       if (response.status === 201) {
-        toast.success("Registration successful");
+        toast.success("Account created. Check your email to verify it.");
         setUserData({
           name: "",
           username: "",
           email: "",
           password: "",
         });
-        navigate("/login");
+        navigate(`/verify-email?email=${encodeURIComponent(email)}`, {
+          replace: true,
+        });
       }
     } catch (error) {
       const message = error.response?.data?.message || "Registration failed";
@@ -171,6 +160,10 @@ const Register = () => {
               Use atleast 8 characters mix of letters and numbers
             </p>
 
+            <p className="text-xs text-muted -mt-2">
+              We&apos;ll email you a link to verify your address.
+            </p>
+
             <button
               type="submit"
               className="w-full brand-gradient text-white font-medium py-3 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-glow cursor-pointer hover:opacity-95 transition"
@@ -179,30 +172,19 @@ const Register = () => {
             </button>
           </form>
 
-          <div className="flex items-center justify-center px-4 sm:px-20 py-5 gap-4">
-            <div className="h-px flex-1 bg-linear-to-r from-transparent to-brand-200"></div>
-            <span className="text-sm text-muted">or</span>
-            <div className="h-px flex-1 bg-linear-to-l from-transparent to-brand-200"></div>
-          </div>
-
-          <div className="flex justify-center pb-5">
-            <GoogleLogin
-              width={googleButtonWidth}
-              text="continue_with"
-              shape="pill"
-              onSuccess={(credentialResponse) => {
-                console.log(credentialResponse);
-              }}
-              onError={() => {
-                console.log("Google Login Failed");
-              }}
-            />
-          </div>
+          <GoogleAuthButton />
 
           <p className="text-ink">
             Already have an account?{" "}
             <Link to={"/login"} className="text-brand-600">
               Log in
+            </Link>
+          </p>
+
+          <p className="text-sm text-muted mt-2">
+            Need to verify your email?{" "}
+            <Link to={"/verify-email"} className="text-brand-600">
+              Resend the link
             </Link>
           </p>
         </div>

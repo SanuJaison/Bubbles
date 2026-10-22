@@ -4,6 +4,12 @@ import { io } from "socket.io-client";
 
 import { useAuth } from "./AuthContext";
 
+const socketURL = (
+  import.meta.env.VITE_SOCKET_URL || "http://localhost:3000"
+)
+  .trim()
+  .replace(/\/+$/, "");
+
 const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
@@ -22,7 +28,7 @@ export const SocketProvider = ({ children }) => {
 
     console.log("Creating socket connection...");
 
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io(socketURL, {
       auth: {
         token,
       },

@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("activeChatId");
 
       setToken(null);
       setUser(null);
@@ -59,6 +60,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    // Don't let the next account restore a conversation that belonged to
+    // the user who just signed out.
+    localStorage.removeItem("activeChatId");
 
     setToken(null);
     setUser(null);
@@ -70,9 +74,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(updatedUser));
   };
 
+  const updateToken = (nextToken) => {
+    if (!nextToken) {
+      return;
+    }
+
+    localStorage.setItem("token", nextToken);
+    setToken(nextToken);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, token, loading, login, logout, updateUser }}
+      value={{ user, token, loading, login, logout, updateUser, updateToken }}
     >
       {children}
     </AuthContext.Provider>

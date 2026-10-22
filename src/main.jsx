@@ -9,20 +9,30 @@ import { SocketProvider } from "./context/SocketContext.jsx";
 import { CallProvider } from "./context/CallContext.jsx";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
+const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || "").trim();
+
+const app = (
+  <ThemeProvider>
+    <AuthProvider>
+      <SocketProvider>
+        <CallProvider>
+          <App />
+        </CallProvider>
+      </SocketProvider>
+    </AuthProvider>
+  </ThemeProvider>
+);
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <GoogleOAuthProvider clientId="415236794272-at0efrtnhpi83e0cil97nia8b3dildg9.apps.googleusercontent.com">
-        <ThemeProvider>
-          <AuthProvider>
-            <SocketProvider>
-              <CallProvider>
-                <App />
-              </CallProvider>
-            </SocketProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </GoogleOAuthProvider>
+      {googleClientId ? (
+        <GoogleOAuthProvider clientId={googleClientId}>
+          {app}
+        </GoogleOAuthProvider>
+      ) : (
+        app
+      )}
     </BrowserRouter>
   </StrictMode>,
 );

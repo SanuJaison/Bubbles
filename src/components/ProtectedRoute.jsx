@@ -16,6 +16,10 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  if (user.needsUsername) {
+    return <Navigate to="/choose-username" replace />;
+  }
+
   return children;
 };
 

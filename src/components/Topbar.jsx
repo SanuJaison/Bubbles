@@ -24,9 +24,13 @@ const Topbar = () => {
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(
+    () => window.history.state?.bubblesOverlay === "profile",
+  );
 
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(
+    () => window.history.state?.bubblesOverlay === "settings",
+  );
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -42,31 +46,86 @@ const Topbar = () => {
     setTheme(THEME_CYCLE[nextIndex]);
   };
 
+  // Profile and Settings behave like real screens: each opens a history
+  // entry, so the browser Back button closes them (and Forward re-opens them)
+  // without leaving the chat list underneath.
+  const pushOverlay = (overlay) => {
+    if (window.history.state?.bubblesOverlay === overlay) {
+      return;
+    }
+
+    window.history.pushState(
+      {
+        ...(window.history.state || {}),
+        bubblesOverlay: overlay,
+      },
+      "",
+      window.location.href,
+    );
+  };
+
+  const replaceOverlay = (overlay) => {
+    window.history.replaceState(
+      {
+        ...(window.history.state || {}),
+        bubblesOverlay: overlay,
+      },
+      "",
+      window.location.href,
+    );
+  };
+
+  const closeOverlay = () => {
+    if (window.history.state?.bubblesOverlay) {
+      window.history.back();
+      return;
+    }
+
+    setShowProfileMenu(false);
+    setShowProfileModal(false);
+    setShowSettingsModal(false);
+  };
+
   const handleOpenProfile = () => {
     setShowProfileMenu(false);
+    pushOverlay("profile");
     setShowProfileModal(true);
   };
 
   const handleOpenSettings = () => {
     setShowProfileMenu(false);
+    pushOverlay("settings");
     setShowSettingsModal(true);
   };
 
   const handleCloseProfile = () => {
-    setShowProfileModal(false);
+    closeOverlay();
   };
 
   const handleCloseSettings = () => {
-    setShowSettingsModal(false);
+    closeOverlay();
   };
 
   const handleSettingsBack = () => {
+    replaceOverlay("profile");
     setShowSettingsModal(false);
     setShowProfileModal(true);
   };
 
   const handleProfileUpdated = () => {
+    closeOverlay();
+  };
+
+  const openSettingsFromProfile = () => {
+    pushOverlay("settings");
     setShowProfileModal(false);
+    setShowSettingsModal(true);
+  };
+
+  const openProfileFromSettings = () => {
+    pushOverlay("profile");
+    setShowSettingsModal(false);
+    setShowProfileModal(true);
   };
 
   const handleLogout = () => {
@@ -77,7 +136,7 @@ const Topbar = () => {
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
     logout();
-    navigate("/login");
+    navigate("/login", { replace: true });
   };
 
   useEffect(() => {
@@ -96,6 +155,26 @@ const Topbar = () => {
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [showProfileMenu]);
+
+  // Browser Back/Forward should never leave an account/settings sheet
+  // floating over a different screen. Home restores the chat view; this
+  // listener restores whichever top-bar screen the history entry describes.
+  useEffect(() => {
+    const syncTopbarOverlays = (event) => {
+      const overlay = event.state?.bubblesOverlay;
+
+      setShowProfileMenu(false);
+      setShowLogoutConfirm(false);
+      setShowProfileModal(overlay === "profile");
+      setShowSettingsModal(overlay === "settings");
+    };
+
+    window.addEventListener("popstate", syncTopbarOverlays);
+
+    return () => {
+      window.removeEventListener("popstate", syncTopbarOverlays);
+    };
+  }, []);
 
   return (
     <>
@@ -215,10 +294,7 @@ const Topbar = () => {
       {showProfileModal && (
         <ProfileModal
           onClose={handleCloseProfile}
-          onSettings={() => {
-            setShowProfileModal(false);
-            setShowSettingsModal(true);
-          }}
+          onSettings={openSettingsFromProfile}
           onProfileUpdated={handleProfileUpdated}
         />
       )}
@@ -227,10 +303,7 @@ const Topbar = () => {
         <SettingsModal
           onClose={handleCloseSettings}
           onBack={handleSettingsBack}
-          onEditProfile={() => {
-            setShowSettingsModal(false);
-            setShowProfileModal(true);
-          }}
+          onEditProfile={openProfileFromSettings}
         />
       )}
 

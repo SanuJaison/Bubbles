@@ -4,6 +4,7 @@ import {
   LuLock,
   LuBell,
   LuEye,
+  LuEyeOff,
   LuArrowLeft,
   LuImage,
   LuLogOut,
@@ -42,22 +43,63 @@ const Toggle = ({ enabled, onClick, disabled }) => {
   );
 };
 
+const PasswordField = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  visible,
+  onToggle,
+  autoComplete,
+}) => (
+  <div>
+    <label className="block text-sm text-ink mb-1">{label}</label>
+
+    <div className="flex items-center border border-brand-100 rounded-lg px-3 py-2 bg-white focus-within:border-brand-400 transition">
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        className="text-sm text-ink outline-none bg-transparent flex-1 min-w-0"
+      />
+
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-label={visible ? "Hide password" : "Show password"}
+        className="ml-2 shrink-0 text-muted hover:text-brand-600 transition cursor-pointer"
+      >
+        {visible ? (
+          <LuEyeOff className="text-lg" />
+        ) : (
+          <LuEye className="text-lg" />
+        )}
+      </button>
+    </div>
+  </div>
+);
+
 const SettingsModal = ({ onClose, onBack, onEditProfile }) => {
   const [view, setView] = useState("main");
 
   const [savingKey, setSavingKey] = useState(null);
 
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [passwordSaving, setPasswordSaving] = useState(false);
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const { user, logout, updateUser } = useAuth();
+  const { user, logout, updateUser, updateToken } = useAuth();
 
   const navigate = useNavigate();
 
@@ -133,13 +175,21 @@ const SettingsModal = ({ onClose, onBack, onEditProfile }) => {
   };
 
   const handleChangePassword = async () => {
-    if (!passwordForm.currentPassword || !passwordForm.newPassword) {
-      toast.error("Please fill in both password fields");
+    if (!passwordForm.newPassword || !passwordForm.confirmPassword) {
+      toast.error("Enter and confirm your new password");
       return;
     }
 
-    if (passwordForm.newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters");
+    if (passwordForm.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+
+    if (
+      !/[a-z]/i.test(passwordForm.newPassword) ||
+      !/[0-9]/.test(passwordForm.newPassword)
+    ) {
+      toast.error("Password must include at least one letter and one number");
       return;
     }
 
@@ -153,23 +203,30 @@ const SettingsModal = ({ onClose, onBack, onEditProfile }) => {
 
       const token = localStorage.getItem("token");
 
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
       const response = await changePasswordAPI(
-        {
-          currentPassword: passwordForm.currentPassword,
-          newPassword: passwordForm.newPassword,
-        },
+        { newPassword: passwordForm.newPassword },
         { Authorization: `Bearer ${token}` },
       );
 
       if (response.status === 200) {
+        if (response.data?.token) {
+          updateToken(response.data.token);
+        }
+
         toast.success("Password updated");
 
         setPasswordForm({
-          currentPassword: "",
           newPassword: "",
           confirmPassword: "",
         });
 
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
         setView("main");
       }
     } catch (error) {
@@ -208,8 +265,9 @@ const SettingsModal = ({ onClose, onBack, onEditProfile }) => {
   const confirmLogout = () => {
     setShowLogoutConfirm(false);
     logout();
-    onClose();
-    navigate("/login");
+    // Replacing this history entry is the close action; calling onClose()
+    // here would also trigger a native history.back() and race the redirect.
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -250,62 +308,45 @@ const SettingsModal = ({ onClose, onBack, onEditProfile }) => {
             <MessageThemePicker onBack={() => setView("main")} />
           ) : view === "password" ? (
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-ink mb-1">
-                  Current password
-                </label>
+              <p className="text-sm text-muted">
+                Choose a new password. We won't ask for your current one, but
+                you can't reuse it.
+              </p>
 
-                <input
-                  type="password"
-                  value={passwordForm.currentPassword}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      currentPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="Enter current password"
-                  className="w-full border border-brand-100 rounded-lg px-3 py-2 text-sm text-ink outline-none bg-white focus:border-brand-400"
-                />
-              </div>
+              <PasswordField
+                label="New password"
+                value={passwordForm.newPassword}
+                onChange={(event) =>
+                  setPasswordForm((previous) => ({
+                    ...previous,
+                    newPassword: event.target.value,
+                  }))
+                }
+                placeholder="At least 8 characters"
+                autoComplete="new-password"
+                visible={showNewPassword}
+                onToggle={() => setShowNewPassword((visible) => !visible)}
+              />
 
-              <div>
-                <label className="block text-sm text-ink mb-1">
-                  New password
-                </label>
+              <PasswordField
+                label="Confirm new password"
+                value={passwordForm.confirmPassword}
+                onChange={(event) =>
+                  setPasswordForm((previous) => ({
+                    ...previous,
+                    confirmPassword: event.target.value,
+                  }))
+                }
+                placeholder="Repeat new password"
+                autoComplete="new-password"
+                visible={showConfirmPassword}
+                onToggle={() => setShowConfirmPassword((visible) => !visible)}
+              />
 
-                <input
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="At least 6 characters"
-                  className="w-full border border-brand-100 rounded-lg px-3 py-2 text-sm text-ink outline-none bg-white focus:border-brand-400"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm text-ink mb-1">
-                  Confirm new password
-                </label>
-
-                <input
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={(e) =>
-                    setPasswordForm((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  placeholder="Repeat new password"
-                  className="w-full border border-brand-100 rounded-lg px-3 py-2 text-sm text-ink outline-none bg-white focus:border-brand-400"
-                />
-              </div>
+              <p className="flex items-center gap-1.5 text-xs text-muted">
+                <LuEye className="text-base text-brand-600 shrink-0" />
+                At least 8 characters, including a letter and a number.
+              </p>
 
               <button
                 type="button"
