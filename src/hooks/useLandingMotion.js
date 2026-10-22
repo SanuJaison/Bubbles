@@ -23,6 +23,7 @@ const useLandingMotion = () => {
     }
 
     let disposed = false;
+    const listeners = [];
 
     const context = gsap.context(() => {
       const heroItems = gsap.utils.toArray("[data-hero]");
@@ -104,6 +105,48 @@ const useLandingMotion = () => {
           ease: "sine.inOut",
         });
       });
+
+      const tiltArea = root.querySelector("[data-hero-visual]");
+      const tiltTarget = root.querySelector("[data-tilt]");
+      const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+      if (tiltArea && tiltTarget && finePointer) {
+        gsap.set(tiltTarget, {
+          transformPerspective: 1200,
+          transformOrigin: "center center",
+        });
+
+        const rotateX = gsap.quickTo(tiltTarget, "rotationX", {
+          duration: 0.8,
+          ease: "power3.out",
+        });
+        const rotateY = gsap.quickTo(tiltTarget, "rotationY", {
+          duration: 0.8,
+          ease: "power3.out",
+        });
+
+        const handlePointerMove = (event) => {
+          const bounds = tiltArea.getBoundingClientRect();
+          const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+          const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+
+          rotateY(x * 7);
+          rotateX(-y * 7);
+        };
+
+        const handlePointerLeave = () => {
+          rotateX(0);
+          rotateY(0);
+        };
+
+        tiltArea.addEventListener("pointermove", handlePointerMove);
+        tiltArea.addEventListener("pointerleave", handlePointerLeave);
+
+        listeners.push(() => {
+          tiltArea.removeEventListener("pointermove", handlePointerMove);
+          tiltArea.removeEventListener("pointerleave", handlePointerLeave);
+        });
+      }
     }, root);
 
     const refresh = () => {
@@ -121,6 +164,7 @@ const useLandingMotion = () => {
     return () => {
       disposed = true;
       window.removeEventListener("load", refresh);
+      listeners.forEach((removeListener) => removeListener());
       context.revert();
     };
   }, []);

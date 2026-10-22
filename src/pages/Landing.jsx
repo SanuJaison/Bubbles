@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LuAppWindow,
@@ -305,16 +305,45 @@ const InfoCard = ({ icon: Icon, title, children }) => (
   </div>
 );
 
-const FaqItem = ({ question, answer }) => (
-  <details className="group glass-strong rounded-2xl border border-brand-100/70 p-5 shadow-soft">
-    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-ink [&::-webkit-details-marker]:hidden">
-      {question}
-      <LuChevronDown className="shrink-0 text-muted transition group-open:rotate-180" />
-    </summary>
+const FaqItem = ({ question, answer, open, onToggle }) => {
+  const panelId = `faq-${question
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")}`;
 
-    <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
-  </details>
-);
+  return (
+    <div className="glass-strong rounded-2xl border border-brand-100/70 p-5 shadow-soft">
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={onToggle}
+        className="flex w-full cursor-pointer items-center justify-between gap-4 text-left text-sm font-semibold text-ink focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+      >
+        {question}
+        <LuChevronDown
+          className={`shrink-0 text-muted transition-transform duration-300 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      <div
+        id={panelId}
+        aria-hidden={!open}
+        className={`grid transition-all duration-300 ease-out ${
+          open
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="mt-3 text-sm leading-6 text-muted">{answer}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const FloatingMessageCard = () => (
   <div
@@ -360,6 +389,7 @@ const FloatingAiCard = () => (
 
 const Landing = () => {
   const rootRef = useLandingMotion();
+  const [openFaq, setOpenFaq] = useState(null);
 
   usePageMeta({
     title: "Bubbles | Chat, Calls & AI in One Place",
@@ -496,7 +526,9 @@ const Landing = () => {
             >
               <div className="absolute -inset-6 -z-10 rounded-[44px] bg-linear-to-br from-brand-200/50 via-blush-300/30 to-coral-300/40 blur-2xl" />
 
-              <DesktopPreview />
+              <div data-tilt className="relative">
+                <DesktopPreview />
+              </div>
 
               <div
                 data-float
@@ -721,7 +753,16 @@ const Landing = () => {
               className="mx-auto mt-10 grid max-w-5xl gap-3 lg:grid-cols-2"
             >
               {FAQS.map((faq) => (
-                <FaqItem key={faq.question} {...faq} />
+                <FaqItem
+                  key={faq.question}
+                  {...faq}
+                  open={openFaq === faq.question}
+                  onToggle={() =>
+                    setOpenFaq((current) =>
+                      current === faq.question ? null : faq.question,
+                    )
+                  }
+                />
               ))}
             </div>
           </div>
