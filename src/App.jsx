@@ -9,6 +9,7 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import ChooseUsername from "./pages/ChooseUsername";
 import Home from "./pages/Home";
+import Landing from "./pages/Landing";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CallOverlay from "./components/CallOverlay";
 
@@ -45,7 +46,14 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>}/>
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute fallback={<Landing />}>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

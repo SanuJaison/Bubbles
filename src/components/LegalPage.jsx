@@ -7,13 +7,15 @@ const LegalPage = ({ title, updated, children }) => (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link
-          to="/login"
+          to="/"
           className="flex items-center gap-2 text-sm text-muted hover:text-brand-600"
         >
-          <LuArrowLeft className="text-base" /> Back
+          <LuArrowLeft className="text-base" /> Back to Bubbles
         </Link>
 
-        <img width={110} src={bubbles} alt="Bubbles" />
+        <Link to="/" aria-label="Bubbles home">
+          <img width={110} src={bubbles} alt="Bubbles" />
+        </Link>
       </div>
 
       <article className="glass-strong rounded-3xl border border-brand-100/70 p-6 shadow-soft sm:p-10">
