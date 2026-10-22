@@ -54,7 +54,7 @@ const useLandingMotion = () => {
 
       gsap.utils.toArray("[data-reveal]").forEach((item) => {
         gsap.from(item, {
-          opacity: 0,
+          opacity: 0.72,
           y: 22,
           duration: 0.7,
           ease: "power3.out",
@@ -69,7 +69,7 @@ const useLandingMotion = () => {
 
       gsap.utils.toArray("[data-reveal-group]").forEach((group) => {
         gsap.from(Array.from(group.children), {
-          opacity: 0,
+          opacity: 0.72,
           y: 22,
           duration: 0.65,
           ease: "power3.out",
