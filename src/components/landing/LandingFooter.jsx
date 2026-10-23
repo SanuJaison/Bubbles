@@ -29,7 +29,7 @@ const LandingFooter = () => (
 
           <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-brand-100/70 bg-white/60 px-3 py-1.5 text-xs text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            Web app live · Windows &amp; Android in development
+            Web app live · Windows app available · Android in development
           </p>
         </div>
 

@@ -118,6 +118,11 @@ const FAQS = [
       "Yes. Open the web app in your mobile browser. The native Android app is in development.",
   },
   {
+    question: "Is there a Windows app?",
+    answer:
+      "Yes. Download the Windows installer from the download section or the GitHub Releases page. It is an unsigned build, so Windows SmartScreen may ask you to confirm before running it.",
+  },
+  {
     question: "How will I install the Android app?",
     answer:
       "When the APK is released, download it, open it, and allow installs from your browser if Android asks. The Play Store release can come later.",
@@ -399,7 +404,7 @@ const Landing = () => {
   usePageMeta({
     title: "Bubbles | Chat, Calls & AI in One Place",
     description:
-      "Bubbles is a real-time chat app with groups, voice notes, file sharing, AI replies, and web calls. Use it in your browser today; Windows and Android apps are on the way.",
+      "Bubbles is a real-time chat app with groups, voice notes, file sharing, AI replies, and web calls. Use it in your browser today, or download the Windows app. The Android app is on the way.",
     path: "/",
   });
 
@@ -481,7 +486,7 @@ const Landing = () => {
                 className="inline-flex items-center gap-2 rounded-full border border-brand-200/80 bg-brand-50/70 px-3 py-1.5 text-xs font-medium text-brand-700"
               >
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Web app live · Windows + Android coming soon
+                Web app live · Windows app available · Android coming soon
               </span>
 
               <h1
@@ -498,8 +503,8 @@ const Landing = () => {
               >
                 Bubbles brings real-time chats, groups, voice notes, file
                 sharing, AI replies, and calls into one beautifully simple
-                place. Use it in your browser today — native Windows and
-                Android apps are on the way.
+                place. Use it in your browser today, or download the Windows
+                app. The Android app is on the way.
               </p>
 
               <div
@@ -702,7 +707,7 @@ const Landing = () => {
             <SectionHeading
               eyebrow="Take Bubbles with you"
               title="Download Bubbles"
-              description="Use it in your browser today. Native Windows and Android builds are in development — the download buttons will go live as soon as the first installers are ready."
+              description="Download the Windows app today, or keep using Bubbles in your browser. The Android app is still in development — its download button will go live when the first APK is ready."
             />
 
             <div
@@ -719,7 +724,7 @@ const Landing = () => {
                 points={[
                   "Native Windows window",
                   "Desktop notifications",
-                  "Installer and auto-updates planned",
+                  "Same account as the web app",
                 ]}
               />
 
@@ -745,7 +750,7 @@ const Landing = () => {
               className="mt-6 grid gap-4 md:grid-cols-2"
             >
               <InfoCard icon={LuAppWindow} title="Install on Windows">
-                When the installer is available, download it, run it, and follow
+                Download the installer from the button above, run it, and follow
                 the prompts. Unsigned builds may show a Windows SmartScreen
                 warning — choose <strong className="text-ink">More info</strong>{" "}
                 →{" "}
@@ -775,13 +780,14 @@ const Landing = () => {
                   v{APP_VERSION} · {RELEASE_DATE}
                 </span>
                 <br />
-                Web app live. Windows and Android builds in development. Next:
-                installers, push notifications, and Android calls.
+                Web app live. Windows desktop app available. Android in
+                development. Next: auto-updates, push notifications, and Android
+                calls.
               </InfoCard>
 
               <InfoCard icon={LuShieldCheck} title="Checksums & updates">
-                SHA-256 checksums will be published with every installer and
-                APK. Release notes and update details will appear on this page.
+                SHA-256 checksums and release notes are published on the GitHub
+                Releases page. Update details will appear here.
               </InfoCard>
             </div>
           </div>
@@ -868,8 +874,8 @@ const Landing = () => {
                 </h2>
 
                 <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
-                  Open Bubbles in your browser now. Windows and Android apps are
-                  on the way.
+                  Open Bubbles in your browser now, or download the Windows app.
+                  The Android app is on the way.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

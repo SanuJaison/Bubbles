@@ -5,6 +5,9 @@ export const RELEASE_DATE = "October 2026";
 // Windows: direct GitHub Releases asset URL for the .msi / .exe
 // Android: direct GitHub Releases asset URL for the .apk
 export const DOWNLOAD_LINKS = {
-  windows: (import.meta.env.VITE_WINDOWS_DOWNLOAD_URL || "").trim(),
+  windows: (
+    import.meta.env.VITE_WINDOWS_DOWNLOAD_URL ||
+    "https://github.com/SanuJaison/Bubbles/releases/latest"
+  ).trim(),
   android: (import.meta.env.VITE_ANDROID_DOWNLOAD_URL || "").trim(),
 };
