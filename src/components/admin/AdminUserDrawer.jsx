@@ -156,8 +156,8 @@ const AdminUserDrawer = ({ userId, onClose }) => {
         aria-label="Close user details"
       />
 
-      <aside className="relative flex h-full w-full max-w-lg flex-col overflow-hidden bg-white shadow-2xl">
-        <header className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+      <aside className="relative flex h-full w-full max-w-lg flex-col overflow-hidden bg-white shadow-2xl dark:bg-slate-950 dark:shadow-none">
+        <header className="flex items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 px-5 py-5 sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             {user ? (
               <AdminAvatar user={user} size="lg" />
@@ -173,10 +173,10 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                 </>
               ) : (
                 <>
-                  <h2 className="truncate text-lg font-semibold text-slate-900">
+                  <h2 className="truncate text-lg font-semibold text-slate-900 dark:text-slate-100">
                     {user?.name || "User details"}
                   </h2>
-                  <p className="truncate text-sm text-slate-500">
+                  <p className="truncate text-sm text-slate-500 dark:text-slate-400">
                     {user?.username ? `@${user.username}` : user?.email}
                   </p>
                 </>
@@ -187,7 +187,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             aria-label="Close user details"
           >
             <LuX className="text-lg" />
@@ -196,7 +196,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
 
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
           {error ? (
-            <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700">
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
               <div className="flex items-start gap-2">
                 <LuCircleAlert className="mt-0.5 shrink-0 text-base" />
                 <p>{error}</p>
@@ -204,7 +204,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
               <button
                 type="button"
                 onClick={() => setReloadKey((key) => key + 1)}
-                className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-rose-700 underline underline-offset-2"
+                className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-rose-700 underline underline-offset-2 dark:text-rose-300"
               >
                 <LuRefreshCw />
                 Try again
@@ -240,38 +240,38 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                 </AdminBadge>
               </div>
 
-              <dl className="grid gap-3 rounded-2xl bg-slate-50 p-4 text-sm">
+              <dl className="grid gap-3 rounded-2xl bg-slate-50 dark:bg-slate-900 p-4 text-sm">
                 <div className="flex items-start gap-3">
-                  <LuMail className="mt-0.5 shrink-0 text-slate-400" />
+                  <LuMail className="mt-0.5 shrink-0 text-slate-500 dark:text-slate-400" />
                   <div className="min-w-0">
-                    <dt className="text-xs font-medium text-slate-500">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Email
                     </dt>
-                    <dd className="truncate font-medium text-slate-800">
+                    <dd className="truncate font-medium text-slate-800 dark:text-slate-200">
                       {user.email || "—"}
                     </dd>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <LuCalendar className="mt-0.5 shrink-0 text-slate-400" />
+                  <LuCalendar className="mt-0.5 shrink-0 text-slate-500 dark:text-slate-400" />
                   <div>
-                    <dt className="text-xs font-medium text-slate-500">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Joined
                     </dt>
-                    <dd className="font-medium text-slate-800">
+                    <dd className="font-medium text-slate-800 dark:text-slate-200">
                       {formatDate(user.createdAt, { withTime: true })}
                     </dd>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <LuClock className="mt-0.5 shrink-0 text-slate-400" />
+                  <LuClock className="mt-0.5 shrink-0 text-slate-500 dark:text-slate-400" />
                   <div>
-                    <dt className="text-xs font-medium text-slate-500">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Last active
                     </dt>
-                    <dd className="font-medium text-slate-800">
+                    <dd className="font-medium text-slate-800 dark:text-slate-200">
                       {user.isOnline
                         ? "Online now"
                         : formatRelativeTime(user.lastActiveAt)}
@@ -280,11 +280,11 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                 </div>
 
                 {user.bio ? (
-                  <div className="border-t border-slate-200 pt-3">
-                    <dt className="text-xs font-medium text-slate-500">
+                  <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
+                    <dt className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       Bio
                     </dt>
-                    <dd className="mt-1 whitespace-pre-wrap text-slate-700">
+                    <dd className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-300">
                       {user.bio}
                     </dd>
                   </div>
@@ -292,7 +292,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
               </dl>
 
               <section>
-                <h3 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Activity
                 </h3>
                 <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -302,13 +302,13 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                     return (
                       <div
                         key={item.key}
-                        className="rounded-xl border border-slate-200 bg-white p-3"
+                        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white p-3"
                       >
-                        <Icon className="text-sm text-slate-400" />
-                        <p className="mt-2 text-xl font-semibold text-slate-900">
+                        <Icon className="text-sm text-slate-500 dark:text-slate-400" />
+                        <p className="mt-2 text-xl font-semibold text-slate-900 dark:text-slate-100">
                           {formatNumber(stats?.[item.key] || 0)}
                         </p>
-                        <p className="text-[11px] font-medium text-slate-500">
+                        <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                           {item.label}
                         </p>
                       </div>
@@ -319,10 +319,10 @@ const AdminUserDrawer = ({ userId, onClose }) => {
 
               <section>
                 <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-900">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                     Devices
                   </h3>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
                     {user.deviceCount} recorded
                   </span>
                 </div>
@@ -336,19 +336,19 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                       return (
                         <div
                           key={`${device.type}-${device.os}-${index}`}
-                          className="rounded-xl border border-slate-200 p-3"
+                          className="rounded-xl border border-slate-200 dark:border-slate-700 p-3"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-2.5">
-                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                 <Icon />
                               </span>
                               <div>
-                                <p className="text-sm font-semibold text-slate-800">
+                                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                                   {DEVICE_LABELS[device.type] || "Unknown"}
                                   {device.os ? ` · ${device.os}` : ""}
                                 </p>
-                                <p className="text-xs text-slate-500">
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
                                   {[device.browser, device.ip]
                                     .filter(Boolean)
                                     .join(" · ") || "Browser not recorded"}
@@ -356,12 +356,12 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                               </div>
                             </div>
 
-                            <span className="shrink-0 text-[11px] text-slate-400">
+                            <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
                               {formatRelativeTime(device.lastActiveAt)}
                             </span>
                           </div>
 
-                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 pl-11 text-[11px] text-slate-400">
+                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 pl-11 text-[11px] text-slate-500 dark:text-slate-400">
                             <span>
                               First seen {formatDate(device.firstSeenAt)}
                             </span>
@@ -374,7 +374,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
 
                           {device.userAgent ? (
                             <p
-                              className="mt-2 truncate pl-11 text-[10px] text-slate-400"
+                              className="mt-2 truncate pl-11 text-[10px] text-slate-500 dark:text-slate-400"
                               title={device.userAgent}
                             >
                               {device.userAgent}
@@ -385,13 +385,13 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                     })}
                   </div>
                 ) : (
-                  <div className="mt-3 rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
+                  <div className="mt-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
                     No device data has been recorded for this account yet.
                   </div>
                 )}
               </section>
 
-              <div className="flex items-center gap-2 rounded-xl bg-violet-50 px-3 py-2.5 text-xs text-violet-700">
+              <div className="flex items-center gap-2 rounded-xl bg-violet-50 dark:bg-violet-500/10 px-3 py-2.5 text-xs text-violet-700 dark:text-violet-300">
                 <LuGlobe className="shrink-0" />
                 Device data updates when the person signs in or opens Bubbles.
               </div>
@@ -399,11 +399,11 @@ const AdminUserDrawer = ({ userId, onClose }) => {
           ) : null}
         </div>
 
-        <footer className="border-t border-slate-100 px-5 py-4 sm:px-6">
+        <footer className="border-t border-slate-100 dark:border-slate-800 px-5 py-4 sm:px-6">
           <button
             type="button"
             onClick={onClose}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 dark:bg-violet-600 dark:hover:bg-violet-500"
           >
             {loading ? <AdminSpinner /> : null}
             Close

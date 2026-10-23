@@ -35,11 +35,11 @@ const PAGE_SIZE = 20;
 
 const UsersSkeleton = () => (
   <AdminCard className="overflow-hidden" aria-hidden="true">
-    <div className="border-b border-slate-100 px-5 py-4">
+    <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-4">
       <AdminSkeleton className="h-5 w-28" />
       <AdminSkeleton className="mt-2 h-3 w-40" />
     </div>
-    <div className="divide-y divide-slate-100">
+    <div className="divide-y divide-slate-100 dark:divide-slate-800">
       {Array.from({ length: 6 }).map((_, index) => (
         <div key={index} className="flex items-center gap-4 px-5 py-4">
           <AdminSkeleton className="h-11 w-11 rounded-full" />
@@ -204,7 +204,7 @@ const AdminUsers = () => {
   );
 
   const selectClasses =
-    "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-50";
+    "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:shadow-none dark:focus:border-violet-500 dark:focus:ring-violet-500/20";
 
   return (
     <div className="space-y-6">
@@ -228,19 +228,19 @@ const AdminUsers = () => {
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
           <label className="relative block">
             <span className="sr-only">Search users</span>
-            <LuSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <LuSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search name, username, or email"
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-9 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-50"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-9 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-500 focus:border-violet-400 focus:ring-4 focus:ring-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
             />
             {search ? (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                 aria-label="Clear search"
               >
                 <LuX />
@@ -301,8 +301,8 @@ const AdminUsers = () => {
         </div>
 
         {hasFilters ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
-            <p className="text-xs text-slate-500">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800 pt-3">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {pagination
                 ? `${formatNumber(pagination.total)} matching account${
                     pagination.total === 1 ? "" : "s"
@@ -312,7 +312,7 @@ const AdminUsers = () => {
             <button
               type="button"
               onClick={resetFilters}
-              className="text-xs font-semibold text-violet-700 hover:text-violet-800"
+              className="text-xs font-semibold text-violet-700 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
             >
               Clear filters
             </button>
@@ -326,7 +326,7 @@ const AdminUsers = () => {
 
       {error && users.length > 0 ? (
         <div
-          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <span>{error}</span>
@@ -362,12 +362,12 @@ const AdminUsers = () => {
 
       {users.length > 0 ? (
         <AdminCard className="overflow-hidden">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-5 py-4">
             <div>
-              <h2 className="text-sm font-semibold text-slate-900">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                 All users
               </h2>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 {pagination
                   ? `${formatNumber(pagination.total)} account${
                       pagination.total === 1 ? "" : "s"
@@ -376,7 +376,7 @@ const AdminUsers = () => {
               </p>
             </div>
             {loading || refreshing ? (
-              <span className="inline-flex items-center gap-2 text-xs text-slate-400">
+              <span className="inline-flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                 <LuRefreshCw className="animate-spin" />
                 Updating
               </span>
@@ -385,7 +385,7 @@ const AdminUsers = () => {
 
           <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[860px] text-left text-sm">
-              <thead className="bg-slate-50 text-[11px] uppercase tracking-[0.12em] text-slate-500">
+              <thead className="bg-slate-50 dark:bg-slate-900/60 text-[11px] uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400">
                 <tr>
                   <th scope="col" className="px-5 py-3 font-semibold">
                     User
@@ -408,19 +408,19 @@ const AdminUsers = () => {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {users.map((user) => (
                   <tr
                     key={user._id}
                     onClick={() => openUser(user._id)}
-                    className="cursor-pointer transition hover:bg-slate-50"
+                    className="cursor-pointer transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <AdminAvatar user={user} size="sm" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <p className="truncate font-semibold text-slate-800">
+                            <p className="truncate font-semibold text-slate-800 dark:text-slate-200">
                               {getDisplayName(user)}
                             </p>
                             {user.emailVerified ? (
@@ -430,7 +430,7 @@ const AdminUsers = () => {
                               />
                             ) : null}
                           </div>
-                          <p className="truncate text-xs text-slate-500">
+                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                             {user.username
                               ? `@${user.username}`
                               : user.email}
@@ -447,7 +447,7 @@ const AdminUsers = () => {
                           className={`h-1.5 w-1.5 rounded-full ${
                             user.isOnline
                               ? "bg-emerald-500"
-                              : "bg-slate-400"
+                              : "bg-slate-400 dark:bg-slate-500"
                           }`}
                         />
                         {user.isOnline ? "Online" : "Offline"}
@@ -458,11 +458,11 @@ const AdminUsers = () => {
                       <AdminDeviceChips devices={user.devices} limit={2} />
                     </td>
 
-                    <td className="px-4 py-4 text-xs text-slate-500">
+                    <td className="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">
                       {formatDate(user.createdAt)}
                     </td>
 
-                    <td className="px-4 py-4 text-xs text-slate-500">
+                    <td className="px-4 py-4 text-xs text-slate-500 dark:text-slate-400">
                       {user.isOnline
                         ? "Online now"
                         : formatRelativeTime(user.lastActiveAt)}
@@ -475,7 +475,7 @@ const AdminUsers = () => {
                           event.stopPropagation();
                           openUser(user._id);
                         }}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-200"
                         aria-label={`Open details for ${getDisplayName(
                           user,
                         )}`}
@@ -489,19 +489,19 @@ const AdminUsers = () => {
             </table>
           </div>
 
-          <div className="divide-y divide-slate-100 md:hidden">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800 md:hidden">
             {users.map((user) => (
               <button
                 key={user._id}
                 type="button"
                 onClick={() => openUser(user._id)}
-                className="flex w-full items-start gap-3 px-4 py-4 text-left transition hover:bg-slate-50"
+                className="flex w-full items-start gap-3 px-4 py-4 text-left transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
               >
                 <AdminAvatar user={user} size="sm" />
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-semibold text-slate-800">
+                    <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
                       {getDisplayName(user)}
                     </p>
                     {user.emailVerified ? (
@@ -511,7 +511,7 @@ const AdminUsers = () => {
                       />
                     ) : null}
                   </div>
-                  <p className="truncate text-xs text-slate-500">
+                  <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                     {user.username ? `@${user.username}` : user.email}
                   </p>
 
@@ -521,7 +521,7 @@ const AdminUsers = () => {
                     >
                       {user.isOnline ? "Online" : "Offline"}
                     </AdminBadge>
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       {user.isOnline
                         ? "Online now"
                         : formatRelativeTime(user.lastActiveAt)}
@@ -533,7 +533,7 @@ const AdminUsers = () => {
                   </div>
                 </div>
 
-                <LuChevronRight className="mt-1 shrink-0 text-slate-400" />
+                <LuChevronRight className="mt-1 shrink-0 text-slate-500 dark:text-slate-400" />
               </button>
             ))}
           </div>

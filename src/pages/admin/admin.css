@@ -6,6 +6,13 @@
     #f7f8fc;
 }
 
+.dark .admin-shell {
+  background:
+    radial-gradient(900px 480px at 0% 0%, rgba(139, 92, 246, 0.14), transparent 62%),
+    radial-gradient(800px 480px at 100% 100%, rgba(236, 72, 153, 0.08), transparent 62%),
+    #0b0b10;
+}
+
 .admin-login-shell {
   min-height: 100vh;
   background:

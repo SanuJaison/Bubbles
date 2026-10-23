@@ -284,7 +284,7 @@ const AdminFeedback = () => {
   };
 
   const selectClasses =
-    "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-50 disabled:cursor-wait disabled:bg-slate-50";
+    "rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-50 disabled:cursor-wait disabled:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:shadow-none dark:focus:border-violet-500 dark:focus:ring-violet-500/20 dark:disabled:bg-slate-800";
 
   return (
     <div className="space-y-6">
@@ -308,19 +308,19 @@ const AdminFeedback = () => {
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
           <label className="relative block">
             <span className="sr-only">Search feedback</span>
-            <LuSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <LuSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400" />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search message, name, or email"
-              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-9 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-50"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-9 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-500 focus:border-violet-400 focus:ring-4 focus:ring-violet-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:shadow-none dark:placeholder:text-slate-400 dark:focus:border-violet-500 dark:focus:ring-violet-500/20"
             />
             {search ? (
               <button
                 type="button"
                 onClick={() => setSearch("")}
-                className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                className="absolute right-2.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-600 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-300"
                 aria-label="Clear search"
               >
                 <LuX />
@@ -348,7 +348,7 @@ const AdminFeedback = () => {
           </label>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 dark:border-slate-800 pt-4">
           <button
             type="button"
             onClick={() => {
@@ -357,8 +357,8 @@ const AdminFeedback = () => {
             }}
             className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition ${
               statusFilter === ""
-                ? "bg-slate-900 text-white ring-slate-900"
-                : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+                ? "bg-slate-900 text-white ring-slate-900 dark:bg-violet-600 dark:ring-violet-600"
+                : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
             }`}
           >
             All
@@ -366,7 +366,7 @@ const AdminFeedback = () => {
               className={`rounded-full px-1.5 py-0.5 text-[10px] ${
                 statusFilter === ""
                   ? "bg-white/15 text-white"
-                  : "bg-slate-100 text-slate-500"
+                  : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
               }`}
             >
               {formatNumber(summary?.total || 0)}
@@ -386,8 +386,8 @@ const AdminFeedback = () => {
                 }}
                 className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-inset transition ${
                   statusFilter === status
-                    ? "bg-violet-600 text-white ring-violet-600"
-                    : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50"
+                    ? "bg-violet-600 text-white ring-violet-600 dark:bg-violet-500 dark:ring-violet-500"
+                    : "bg-white text-slate-600 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800"
                 }`}
               >
                 {meta.label}
@@ -395,7 +395,7 @@ const AdminFeedback = () => {
                   className={`rounded-full px-1.5 py-0.5 text-[10px] ${
                     statusFilter === status
                       ? "bg-white/15 text-white"
-                      : "bg-slate-100 text-slate-500"
+                      : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"
                   }`}
                 >
                   {formatNumber(statusCounts[status] || 0)}
@@ -408,7 +408,7 @@ const AdminFeedback = () => {
             <button
               type="button"
               onClick={resetFilters}
-              className="ml-auto text-xs font-semibold text-violet-700 hover:text-violet-800"
+              className="ml-auto text-xs font-semibold text-violet-700 dark:text-violet-300 hover:text-violet-800 dark:hover:text-violet-200"
             >
               Clear filters
             </button>
@@ -422,7 +422,7 @@ const AdminFeedback = () => {
 
       {error && feedback.length > 0 ? (
         <div
-          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <span>{error}</span>
@@ -475,7 +475,7 @@ const AdminFeedback = () => {
                 <AdminCard key={item._id} className="p-5">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                         <CategoryIcon />
                       </span>
                       <AdminBadge tone={category.tone}>
@@ -484,14 +484,14 @@ const AdminFeedback = () => {
                       <AdminBadge tone={statusMeta.tone}>
                         {statusMeta.label}
                       </AdminBadge>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
                         {formatRelativeTime(item.createdAt)}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {isUpdating ? (
-                        <AdminSpinner className="text-slate-400" />
+                        <AdminSpinner className="text-slate-500 dark:text-slate-400" />
                       ) : null}
                       <select
                         value={item.status}
@@ -514,18 +514,18 @@ const AdminFeedback = () => {
                     </div>
                   </div>
 
-                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
                     {item.message}
                   </p>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                  <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-slate-100 dark:border-slate-800 pt-3 text-xs text-slate-500 dark:text-slate-400">
                     <span className="inline-flex items-center gap-1.5">
-                      <LuMail className="text-slate-400" />
+                      <LuMail className="text-slate-500 dark:text-slate-400" />
                       {item.name || item.email || "Anonymous"}
                       {item.name && item.email ? (
                         <a
                           href={`mailto:${item.email}`}
-                          className="text-violet-700 hover:underline"
+                          className="text-violet-700 dark:text-violet-300 hover:underline"
                         >
                           {item.email}
                         </a>
@@ -533,12 +533,12 @@ const AdminFeedback = () => {
                     </span>
 
                     <span className="inline-flex items-center gap-1.5">
-                      <LuCalendar className="text-slate-400" />
+                      <LuCalendar className="text-slate-500 dark:text-slate-400" />
                       {formatDate(item.createdAt, { withTime: true })}
                     </span>
 
                     <span className="inline-flex items-center gap-1.5">
-                      <LuGlobe className="text-slate-400" />
+                      <LuGlobe className="text-slate-500 dark:text-slate-400" />
                       {SOURCE_LABELS[item.source] || item.source}
                       {item.page ? ` · ${item.page}` : ""}
                     </span>

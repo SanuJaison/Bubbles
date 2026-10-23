@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import { formatShortDay } from "../../utils/adminFormat";
 
 const WIDTH = 720;
@@ -6,6 +7,8 @@ const HEIGHT = 250;
 const PADDING = { top: 20, right: 16, bottom: 34, left: 42 };
 
 const AdminSignupChart = ({ data = [] }) => {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const rawId = useId();
   const gradientId = `signup-${rawId.replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const plotWidth = WIDTH - PADDING.left - PADDING.right;
@@ -48,8 +51,16 @@ const AdminSignupChart = ({ data = [] }) => {
     >
       <defs>
         <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+          <stop
+            offset="0%"
+            stopColor={isDark ? "#a78bfa" : "#8b5cf6"}
+            stopOpacity="0.28"
+          />
+          <stop
+            offset="100%"
+            stopColor={isDark ? "#a78bfa" : "#8b5cf6"}
+            stopOpacity="0"
+          />
         </linearGradient>
       </defs>
 
@@ -63,7 +74,7 @@ const AdminSignupChart = ({ data = [] }) => {
               x2={WIDTH - PADDING.right}
               y1={y}
               y2={y}
-              stroke="#e2e8f0"
+              stroke={isDark ? "#334155" : "#e2e8f0"}
               strokeDasharray="4 6"
               strokeWidth="1"
             />
@@ -86,7 +97,7 @@ const AdminSignupChart = ({ data = [] }) => {
         <path
           d={linePath}
           fill="none"
-          stroke="#7c3aed"
+          stroke={isDark ? "#a78bfa" : "#7c3aed"}
           strokeWidth="3"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -100,8 +111,8 @@ const AdminSignupChart = ({ data = [] }) => {
             cx={point.x}
             cy={point.y}
             r="4"
-            fill="#ffffff"
-            stroke="#7c3aed"
+            fill={isDark ? "#141418" : "#ffffff"}
+            stroke={isDark ? "#a78bfa" : "#7c3aed"}
             strokeWidth="2.5"
           >
             <title>

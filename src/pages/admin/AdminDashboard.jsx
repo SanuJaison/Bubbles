@@ -207,7 +207,7 @@ const AdminDashboard = () => {
 
       {error && overview ? (
         <div
-          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 sm:flex-row sm:items-center sm:justify-between"
+          className="flex flex-col gap-3 rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 sm:flex-row sm:items-center sm:justify-between"
           role="alert"
         >
           <span>{error}</span>
@@ -289,10 +289,10 @@ const AdminDashboard = () => {
             <AdminCard className="p-5 xl:col-span-2">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                     New users
                   </h2>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     Last 14 days · {formatNumber(signupTotal)} new accounts
                   </p>
                 </div>
@@ -309,10 +309,10 @@ const AdminDashboard = () => {
 
             <AdminCard className="p-5">
               <div>
-                <h2 className="text-sm font-semibold text-slate-900">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Devices
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   Registered users by device type
                 </p>
               </div>
@@ -327,15 +327,15 @@ const AdminDashboard = () => {
                     return (
                       <div key={entry.type}>
                         <div className="flex items-center justify-between gap-3 text-sm">
-                          <span className="inline-flex items-center gap-2 font-medium text-slate-700">
-                            <Icon className="text-slate-400" />
+                          <span className="inline-flex items-center gap-2 font-medium text-slate-700 dark:text-slate-300">
+                            <Icon className="text-slate-500 dark:text-slate-400" />
                             {DEVICE_LABELS[entry.type] || "Unknown"}
                           </span>
-                          <span className="text-xs font-semibold text-slate-500">
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                             {formatNumber(entry.count)} · {percent}%
                           </span>
                         </div>
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                           <div
                             className="h-full rounded-full bg-violet-500"
                             style={{ width: `${percent}%` }}
@@ -346,12 +346,12 @@ const AdminDashboard = () => {
                   })}
                 </div>
               ) : (
-                <div className="mt-5 rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
+                <div className="mt-5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                   Device data will appear after users sign in or open Bubbles.
                 </div>
               )}
 
-              <p className="mt-5 text-[11px] leading-5 text-slate-400">
+              <p className="mt-5 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
                 One person can appear under more than one device type.
               </p>
             </AdminCard>
@@ -361,16 +361,16 @@ const AdminDashboard = () => {
             <AdminCard className="overflow-hidden xl:col-span-2">
               <div className="flex items-center justify-between gap-3 px-5 py-4">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-900">
+                  <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                     Recent users
                   </h2>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                     The newest accounts on Bubbles
                   </p>
                 </div>
                 <Link
                   to="/admin/users"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
                 >
                   View all
                   <LuArrowUpRight />
@@ -378,32 +378,32 @@ const AdminDashboard = () => {
               </div>
 
               {overview.recentUsers?.length ? (
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-slate-100 dark:divide-slate-800">
                   {overview.recentUsers.map((user) => (
                     <Link
                       key={user._id}
                       to={`/admin/users?user=${user._id}`}
-                      className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-slate-50"
+                      className="flex items-center gap-3 px-5 py-3.5 transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
                     >
                       <AdminAvatar user={user} size="sm" />
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-sm font-semibold text-slate-800">
+                          <p className="truncate text-sm font-semibold text-slate-800 dark:text-slate-200">
                             {getDisplayName(user)}
                           </p>
                           <span
                             className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                               user.isOnline
                                 ? "bg-emerald-500"
-                                : "bg-slate-300"
+                                : "bg-slate-300 dark:bg-slate-600"
                             }`}
                             aria-label={
                               user.isOnline ? "Online" : "Offline"
                             }
                           />
                         </div>
-                        <p className="truncate text-xs text-slate-500">
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                           {user.username ? `@${user.username}` : user.email}
                         </p>
                       </div>
@@ -415,7 +415,7 @@ const AdminDashboard = () => {
                         />
                       </div>
 
-                      <span className="shrink-0 text-[11px] text-slate-400">
+                      <span className="shrink-0 text-[11px] text-slate-500 dark:text-slate-400">
                         {formatRelativeTime(user.createdAt)}
                       </span>
                     </Link>
@@ -432,10 +432,10 @@ const AdminDashboard = () => {
 
             <AdminCard className="p-5">
               <div>
-                <h2 className="text-sm font-semibold text-slate-900">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Feedback categories
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   What people are talking about
                 </p>
               </div>
@@ -453,11 +453,11 @@ const AdminDashboard = () => {
                             {CATEGORY_LABELS[entry.category] ||
                               entry.category}
                           </AdminBadge>
-                          <span className="text-xs font-semibold text-slate-500">
+                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                             {formatNumber(entry.count)}
                           </span>
                         </div>
-                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                           <div
                             className={`h-full rounded-full ${
                               entry.category === "bug"
@@ -476,14 +476,14 @@ const AdminDashboard = () => {
                   })}
                 </div>
               ) : (
-                <div className="mt-5 rounded-xl border border-dashed border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
+                <div className="mt-5 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 px-4 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
                   Feedback categories will appear after the first message.
                 </div>
               )}
 
               <Link
                 to="/admin/feedback"
-                className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800"
+                className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
               >
                 Open feedback inbox
                 <LuArrowUpRight />
@@ -494,16 +494,16 @@ const AdminDashboard = () => {
           <AdminCard className="overflow-hidden">
             <div className="flex items-center justify-between gap-3 px-5 py-4">
               <div>
-                <h2 className="text-sm font-semibold text-slate-900">
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Recent feedback
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                   The latest suggestions, bugs, and ideas
                 </p>
               </div>
               <Link
                 to="/admin/feedback"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
               >
                 View inbox
                 <LuArrowUpRight />
@@ -511,12 +511,12 @@ const AdminDashboard = () => {
             </div>
 
             {overview.recentFeedback?.length ? (
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {overview.recentFeedback.map((item) => (
                   <Link
                     key={item._id}
                     to="/admin/feedback"
-                    className="block px-5 py-4 transition hover:bg-slate-50"
+                    className="block px-5 py-4 transition hover:bg-slate-50 dark:hover:bg-slate-800/60"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <AdminBadge
@@ -531,16 +531,16 @@ const AdminDashboard = () => {
                       >
                         {STATUS_LABELS[item.status] || item.status}
                       </AdminBadge>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-slate-500 dark:text-slate-400">
                         {formatRelativeTime(item.createdAt)}
                       </span>
                     </div>
 
-                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-700">
+                    <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-700 dark:text-slate-300">
                       {item.message}
                     </p>
 
-                    <p className="mt-1 truncate text-xs text-slate-400">
+                    <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
                       {item.name || item.email || "Anonymous"}
                       {item.email ? ` · ${item.email}` : ""}
                     </p>
