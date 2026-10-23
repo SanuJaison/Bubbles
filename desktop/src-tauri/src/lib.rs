@@ -26,7 +26,7 @@ fn is_app_host(host: &str) -> bool {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            WebviewWindowBuilder::new(
+            let window = WebviewWindowBuilder::new(
                 app,
                 "main",
                 WebviewUrl::External(APP_URL.parse().expect("valid Bubbles URL")),
@@ -57,6 +57,39 @@ pub fn run() {
                 }
             })
             .build()?;
+
+            // WebView2 blocks Google Identity Services storage by default, which
+            // leaves the Google button as a zero-sized iframe. Disable tracking
+            // prevention for this profile so the hosted sign-in button renders.
+            #[cfg(windows)]
+            window.with_webview(|webview| {
+                use webview2_com::Microsoft::Web::WebView2::Win32::{
+                    ICoreWebView2Profile3, ICoreWebView2_13,
+                    COREWEBVIEW2_TRACKING_PREVENTION_LEVEL_NONE,
+                };
+                use windows::core::Interface;
+
+                unsafe {
+                    let Ok(core) = webview.controller().CoreWebView2() else {
+                        return;
+                    };
+                    let Ok(core) = core.cast::<ICoreWebView2_13>() else {
+                        return;
+                    };
+                    let Ok(profile) = core.Profile() else {
+                        return;
+                    };
+                    let Ok(profile) = profile.cast::<ICoreWebView2Profile3>() else {
+                        return;
+                    };
+                    let _ = profile.SetPreferredTrackingPreventionLevel(
+                        COREWEBVIEW2_TRACKING_PREVENTION_LEVEL_NONE,
+                    );
+                }
+            })?;
+
+            #[cfg(not(windows))]
+            let _ = &window;
 
             Ok(())
         })

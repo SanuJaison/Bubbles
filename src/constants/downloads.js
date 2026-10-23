@@ -1,4 +1,4 @@
-export const APP_VERSION = "1.0.1";
+export const APP_VERSION = "1.0.2";
 export const RELEASE_DATE = "October 2026";
 
 // Set these in Vercel (or a local .env) after the builds exist.

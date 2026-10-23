@@ -40,14 +40,15 @@ Installers are generated as NSIS `.exe` and WiX `.msi` packages.
 The GitHub Actions workflow at `.github/workflows/desktop.yml` builds the Windows installers on `windows-latest` and publishes them to a GitHub Release. Push a tag matching `desktop-v*` to start it:
 
 ```powershell
-git tag desktop-v1.0.1
-git push origin desktop-v1.0.1
+git tag desktop-v1.0.2
+git push origin desktop-v1.0.2
 ```
 
 ## Notes
 
 - The production app loads `https://bubbles-zeta-nine.vercel.app`; the dev app loads `http://localhost:5173`.
 - Google sign-in opens a popup. The app allows `accounts.google.com` popups so the OAuth opener relationship survives, and the hosted origin is already authorized in Google Cloud Console.
+- WebView2 tracking prevention is disabled for the app profile. Without this, Google Identity Services storage is blocked and the sign-in button renders as a zero-sized iframe.
 - Camera and microphone access for calls depends on Windows privacy settings and WebView2 media permissions. WebView2 prompts the user on first use.
 - External links open in the default browser instead of navigating the app window away from Bubbles.
 - The Windows installers are unsigned. Windows SmartScreen may show a warning; users can choose **More info** then **Run anyway**.
