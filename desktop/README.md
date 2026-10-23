@@ -40,13 +40,13 @@ Installers are generated as NSIS `.exe` and WiX `.msi` packages.
 The GitHub Actions workflow at `.github/workflows/desktop.yml` builds the Windows installers on `windows-latest` and publishes them to a GitHub Release. Push a tag matching `desktop-v*` to start it:
 
 ```powershell
-git tag desktop-v1.0.2
-git push origin desktop-v1.0.2
+git tag desktop-v1.0.3
+git push origin desktop-v1.0.3
 ```
 
 ## Notes
 
-- The production app loads `https://bubbles-zeta-nine.vercel.app`; the dev app loads `http://localhost:5173`.
+- The production app loads `https://bubbles-zeta-nine.vercel.app/login`; the dev app loads `http://localhost:5173/login`. An authenticated user is sent straight to their conversations, so the desktop app never shows the marketing landing page on launch.
 - Google sign-in opens a popup. The app allows `accounts.google.com` popups so the OAuth opener relationship survives.
 - The OAuth client's **Authorized JavaScript origins** must include `https://bubbles-zeta-nine.vercel.app`. Google rejects `http://tauri.localhost` because it is not a public top-level domain, which is why the desktop app loads the hosted Vercel origin instead.
 - WebView2 tracking prevention is disabled for the app profile. Without this, Google Identity Services storage is blocked and the sign-in button renders as a zero-sized iframe.

@@ -4,10 +4,10 @@ use tauri::{
 };
 
 #[cfg(debug_assertions)]
-const APP_URL: &str = "http://localhost:5173";
+const APP_URL: &str = "http://localhost:5173/login";
 
 #[cfg(not(debug_assertions))]
-const APP_URL: &str = "https://bubbles-zeta-nine.vercel.app";
+const APP_URL: &str = "https://bubbles-zeta-nine.vercel.app/login";
 
 fn is_app_host(host: &str) -> bool {
     if host == "bubbles-zeta-nine.vercel.app" {

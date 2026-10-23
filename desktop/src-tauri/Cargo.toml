@@ -1,6 +1,6 @@
 [package]
 name = "bubbles"
-version = "1.0.2"
+version = "1.0.3"
 description = "Bubbles desktop chat app"
 authors = ["Bubbles"]
 edition = "2021"

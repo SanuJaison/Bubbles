@@ -6,7 +6,7 @@ import {
   LuEyeOff,
   LuArrowRight,
 } from "react-icons/lu";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext.jsx";
@@ -27,7 +27,17 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const { login } = useAuth();
+  const { login, loading, user } = useAuth();
+
+  // The desktop app opens straight into the app, so send an already
+  // authenticated visitor to their conversations instead of the login form.
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(user.needsUsername ? "/choose-username" : "/", {
+        replace: true,
+      });
+    }
+  }, [loading, navigate, user]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -77,6 +87,10 @@ const Login = () => {
       toast.error(message);
     }
   };
+
+  if (loading || user) {
+    return null;
+  }
 
   return (
     <>
