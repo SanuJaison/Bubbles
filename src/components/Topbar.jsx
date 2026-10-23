@@ -8,6 +8,7 @@ import {
   LuSearch,
   LuUser,
   LuSettings,
+  LuMessageCircle,
   LuLogOut,
 } from "react-icons/lu";
 import ProfileModal from "./ProfileModal";
@@ -96,6 +97,11 @@ const Topbar = () => {
     setShowProfileMenu(false);
     pushOverlay("settings");
     setShowSettingsModal(true);
+  };
+
+  const handleOpenFeedback = () => {
+    setShowProfileMenu(false);
+    navigate("/feedback");
   };
 
   const handleCloseProfile = () => {
@@ -273,6 +279,16 @@ const Topbar = () => {
                     <LuSettings className="text-lg shrink-0" />
 
                     <span className="text-sm font-medium">Settings</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleOpenFeedback}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-brand-50 text-ink transition"
+                  >
+                    <LuMessageCircle className="text-lg shrink-0" />
+
+                    <span className="text-sm font-medium">Send feedback</span>
                   </button>
 
                   <button
