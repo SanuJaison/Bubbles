@@ -1,13 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Bubbles",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "identifier": "com.bubbles.chat",
   "build": {
     "beforeDevCommand": "npm --prefix .. run dev -- --port 5173",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "npm --prefix .. run build",
-    "frontendDist": "../../dist"
+    "frontendDist": "../fallback"
   },
   "app": {
     "windows": [],

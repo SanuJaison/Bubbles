@@ -1,6 +1,6 @@
 # Bubbles Desktop
 
-Windows desktop wrapper for the Bubbles web app, built with Tauri 2 and WebView2.
+Windows desktop wrapper for the Bubbles web app, built with Tauri 2 and WebView2. The app opens the hosted Bubbles frontend in a native window so Google sign-in, calls, and the rest of the web app behave exactly as they do in a browser.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ npm install
 npm run build
 ```
 
-The frontend is built first, then Tauri produces the Windows bundles under:
+Tauri produces the Windows bundles under:
 
 ```text
 frontend/desktop/src-tauri/target/release/bundle/
@@ -35,8 +35,20 @@ frontend/desktop/src-tauri/target/release/bundle/
 
 Installers are generated as NSIS `.exe` and WiX `.msi` packages.
 
+## Release builds
+
+The GitHub Actions workflow at `.github/workflows/desktop.yml` builds the Windows installers on `windows-latest` and publishes them to a GitHub Release. Push a tag matching `desktop-v*` to start it:
+
+```powershell
+git tag desktop-v1.0.1
+git push origin desktop-v1.0.1
+```
+
 ## Notes
 
-- The desktop app uses the same production frontend and backend URLs as the web app.
-- Camera and microphone access for calls depends on Windows privacy settings and WebView2 media permissions.
-- Publish the generated installers through GitHub Releases and set `VITE_WINDOWS_DOWNLOAD_URL` in the frontend deployment when a release is available.
+- The production app loads `https://bubbles-zeta-nine.vercel.app`; the dev app loads `http://localhost:5173`.
+- Google sign-in opens a popup. The app allows `accounts.google.com` popups so the OAuth opener relationship survives, and the hosted origin is already authorized in Google Cloud Console.
+- Camera and microphone access for calls depends on Windows privacy settings and WebView2 media permissions. WebView2 prompts the user on first use.
+- External links open in the default browser instead of navigating the app window away from Bubbles.
+- The Windows installers are unsigned. Windows SmartScreen may show a warning; users can choose **More info** then **Run anyway**.
+- The landing page falls back to `https://github.com/SanuJaison/Bubbles/releases/latest` when `VITE_WINDOWS_DOWNLOAD_URL` is not set.
