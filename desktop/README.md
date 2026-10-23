@@ -47,7 +47,8 @@ git push origin desktop-v1.0.2
 ## Notes
 
 - The production app loads `https://bubbles-zeta-nine.vercel.app`; the dev app loads `http://localhost:5173`.
-- Google sign-in opens a popup. The app allows `accounts.google.com` popups so the OAuth opener relationship survives, and the hosted origin is already authorized in Google Cloud Console.
+- Google sign-in opens a popup. The app allows `accounts.google.com` popups so the OAuth opener relationship survives.
+- The OAuth client's **Authorized JavaScript origins** must include `https://bubbles-zeta-nine.vercel.app`. Google rejects `http://tauri.localhost` because it is not a public top-level domain, which is why the desktop app loads the hosted Vercel origin instead.
 - WebView2 tracking prevention is disabled for the app profile. Without this, Google Identity Services storage is blocked and the sign-in button renders as a zero-sized iframe.
 - Camera and microphone access for calls depends on Windows privacy settings and WebView2 media permissions. WebView2 prompts the user on first use.
 - External links open in the default browser instead of navigating the app window away from Bubbles.
