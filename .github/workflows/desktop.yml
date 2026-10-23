@@ -1,0 +1,64 @@
+name: Build Windows desktop app
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "desktop-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            desktop/package-lock.json
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri -> target
+
+      - name: Build and publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: desktop
+          tagName: desktop-v__VERSION__
+          releaseName: Bubbles Desktop v__VERSION__
+          releaseBody: |
+            Windows installers for Bubbles Desktop.
+
+            - `Bubbles_...-setup.exe` - NSIS installer (recommended)
+            - `Bubbles_..._en-US.msi` - MSI installer
+
+            The build is unsigned, so Windows SmartScreen may warn. Choose
+            "More info" then "Run anyway" to install.
+
+            Bubbles Desktop uses the same account and data as the web app.
+          releaseDraft: false
+          prerelease: false
+          args: --bundles nsis,msi
