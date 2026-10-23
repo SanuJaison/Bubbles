@@ -106,9 +106,77 @@ const useLandingMotion = () => {
         });
       });
 
+      const orbs = gsap.utils.toArray("[data-orb]");
+      const aura = root.querySelector("[data-cursor-aura]");
+      const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+      orbs.forEach((orb, index) => {
+        gsap.to(orb, {
+          scale: 1.06 + index * 0.02,
+          duration: 8 + index * 2,
+          delay: index * 0.4,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+        });
+      });
+
+      if (finePointer) {
+        const orbFollowers = orbs.map((orb) => ({
+          moveX: gsap.quickTo(orb, "x", {
+            duration: 1.1,
+            ease: "power3.out",
+          }),
+          moveY: gsap.quickTo(orb, "y", {
+            duration: 1.1,
+            ease: "power3.out",
+          }),
+          depth: Number(orb.dataset.depth || 24),
+        }));
+
+        const auraX = aura
+          ? gsap.quickTo(aura, "x", {
+              duration: 0.7,
+              ease: "power3.out",
+            })
+          : null;
+        const auraY = aura
+          ? gsap.quickTo(aura, "y", {
+              duration: 0.7,
+              ease: "power3.out",
+            })
+          : null;
+
+        let auraVisible = false;
+
+        const handleWindowPointerMove = (event) => {
+          const x = event.clientX / window.innerWidth - 0.5;
+          const y = event.clientY / window.innerHeight - 0.5;
+
+          orbFollowers.forEach(({ moveX, moveY, depth }) => {
+            moveX(x * depth);
+            moveY(y * depth);
+          });
+
+          if (auraX && auraY) {
+            auraX(event.clientX);
+            auraY(event.clientY);
+
+            if (!auraVisible) {
+              auraVisible = true;
+              gsap.to(aura, { opacity: 1, duration: 0.5 });
+            }
+          }
+        };
+
+        window.addEventListener("pointermove", handleWindowPointerMove);
+        listeners.push(() =>
+          window.removeEventListener("pointermove", handleWindowPointerMove),
+        );
+      }
+
       const tiltArea = root.querySelector("[data-hero-visual]");
       const tiltTarget = root.querySelector("[data-tilt]");
-      const finePointer = window.matchMedia("(pointer: fine)").matches;
 
       if (tiltArea && tiltTarget && finePointer) {
         gsap.set(tiltTarget, {

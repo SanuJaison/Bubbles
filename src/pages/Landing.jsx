@@ -409,10 +409,35 @@ const Landing = () => {
   }, []);
 
   return (
-    <div id="top" ref={rootRef} className="min-h-screen text-ink">
+    <div id="top" ref={rootRef} className="relative min-h-screen text-ink">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      >
+        <div
+          data-orb
+          data-depth="90"
+          className="absolute -top-32 -left-24 h-[30rem] w-[30rem] rounded-full bg-brand-500/15 blur-[110px] dark:bg-brand-500/20"
+        />
+        <div
+          data-orb
+          data-depth="-64"
+          className="absolute top-1/3 -right-32 h-[28rem] w-[28rem] rounded-full bg-blush-400/15 blur-[110px] dark:bg-blush-500/15"
+        />
+        <div
+          data-orb
+          data-depth="48"
+          className="absolute bottom-0 left-1/3 h-[26rem] w-[26rem] rounded-full bg-coral-400/10 blur-[110px] dark:bg-coral-500/10"
+        />
+
+        <div data-cursor-aura className="absolute top-0 left-0 opacity-0">
+          <div className="landing-aura h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full" />
+        </div>
+      </div>
+
       <LandingNav />
 
-      <main>
+      <main className="relative z-10">
         <section className="relative isolate overflow-hidden">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div
@@ -750,7 +775,7 @@ const Landing = () => {
 
             <div
               data-reveal-group
-              className="mx-auto mt-10 grid max-w-5xl gap-3 lg:grid-cols-2"
+              className="mx-auto mt-10 grid max-w-5xl items-start gap-3 lg:grid-cols-2"
             >
               {FAQS.map((faq) => (
                 <FaqItem

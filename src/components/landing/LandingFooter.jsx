@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { LuArrowUp } from "react-icons/lu";
 
 const LandingFooter = () => (
-  <footer className="border-t border-brand-100/60 bg-brand-50/40">
+  <footer className="relative z-10 border-t border-brand-100/60 bg-brand-50/40">
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
