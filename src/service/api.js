@@ -40,6 +40,10 @@ export const getUserProfileAPI = async (reqHeader) => {
     return await commonAPI("GET", "users/profile", "", reqHeader);
 }
 
+export const recordDeviceAPI = async (reqBody, reqHeader) => {
+    return await commonAPI("POST", "users/device", reqBody, reqHeader);
+};
+
 export const editUserProfileAPI = async (reqBody, reqHeader) => {
     return await commonAPI("PATCH", "users/profile", reqBody, reqHeader);
 };

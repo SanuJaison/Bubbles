@@ -65,6 +65,7 @@ export default function usePageMeta({
   title = DEFAULT_TITLE,
   description = DEFAULT_DESCRIPTION,
   path = "/",
+  robots = "index,follow",
 } = {}) {
   useEffect(() => {
     const previousTitle = document.title;
@@ -96,6 +97,10 @@ export default function usePageMeta({
         name: "twitter:description",
         content: description,
       }),
+      upsertMeta('meta[name="robots"]', {
+        name: "robots",
+        content: robots,
+      }),
       upsertCanonical(`${SITE_URL}${path}`),
     ];
 
@@ -103,5 +108,5 @@ export default function usePageMeta({
       document.title = previousTitle;
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [title, description, path]);
+  }, [title, description, path, robots]);
 }

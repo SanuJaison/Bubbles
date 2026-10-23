@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { googleAuthAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext";
+import { getDeviceId } from "../utils/deviceId";
 
 // Google renders its button inside a fixed-width iframe, so the width has to
 // be measured in JS to keep it inside the auth card on small screens.
@@ -64,6 +65,7 @@ const GoogleAuthButton = () => {
 
       const response = await googleAuthAPI({
         credential: credentialResponse.credential,
+        deviceId: getDeviceId(),
       });
 
       if (response.status === 200) {

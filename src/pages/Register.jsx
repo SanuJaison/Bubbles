@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { registerAPI } from "../service/api";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import PublicFooter from "../components/PublicFooter";
+import { getDeviceId } from "../utils/deviceId";
 import toast from "react-hot-toast";
 
 const Register = () => {
@@ -49,7 +50,10 @@ const Register = () => {
     }
 
     try {
-      const response = await registerAPI(userData);
+      const response = await registerAPI({
+        ...userData,
+        deviceId: getDeviceId(),
+      });
 
       if (response.status === 201) {
         toast.success("Account created. Check your email to verify it.");

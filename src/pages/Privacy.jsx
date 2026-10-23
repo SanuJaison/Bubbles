@@ -35,7 +35,9 @@ const Privacy = () => {
       <p>
         <strong>Technical information.</strong> We may collect IP address, browser
         and device information, timestamps, and security logs used to operate and
-        protect the service.
+        protect the service. We also keep a short record of the browsers and
+        devices used to sign in so account activity can be reviewed and
+        suspicious sessions can be investigated.
       </p>
       <p>
         <strong>Preferences.</strong> We store settings such as your theme,

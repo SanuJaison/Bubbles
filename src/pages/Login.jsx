@@ -12,6 +12,7 @@ import { loginAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import PublicFooter from "../components/PublicFooter";
+import { getDeviceId } from "../utils/deviceId";
 import toast from "react-hot-toast";
 
 const Login = () => {
@@ -39,7 +40,10 @@ const Login = () => {
     }
 
     try {
-      const response = await loginAPI(loginData);
+      const response = await loginAPI({
+        ...loginData,
+        deviceId: getDeviceId(),
+      });
 
       if (response.status === 200) {
         const { token, user } = response.data;

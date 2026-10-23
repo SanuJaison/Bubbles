@@ -18,6 +18,7 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Feedback = lazy(() => import("./pages/Feedback"));
 const ChooseUsername = lazy(() => import("./pages/ChooseUsername"));
+const AdminApp = lazy(() => import("./pages/admin/AdminApp"));
 const CallOverlay = lazy(() => import("./components/CallOverlay"));
 
 const CallOverlayGate = () => {
@@ -87,6 +88,7 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/choose-username" element={<ChooseUsername />} />
+          <Route path="/admin/*" element={<AdminApp />} />
         </Routes>
       </Suspense>
 

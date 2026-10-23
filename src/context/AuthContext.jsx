@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getUserProfileAPI } from "../service/api";
+import { getUserProfileAPI, recordDeviceAPI } from "../service/api";
+import { getDeviceId } from "../utils/deviceId";
 
 const AuthContext = createContext();
 
@@ -28,6 +29,10 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.user);
 
         localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // Fire-and-forget: the admin dashboard uses this to show which
+        // devices are actually in use. It must never delay sign-in.
+        recordDeviceAPI({ deviceId: getDeviceId() }, reqHeader).catch(() => {});
       }
     } catch (error) {
       console.log("Authentication failed");
