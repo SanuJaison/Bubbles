@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../service/api";
 import { useAuth } from "../context/AuthContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton";
+import PageLoader from "../components/PageLoader";
 import PublicFooter from "../components/PublicFooter";
 import { getDeviceId } from "../utils/deviceId";
 import toast from "react-hot-toast";
@@ -89,7 +90,7 @@ const Login = () => {
   };
 
   if (loading || user) {
-    return null;
+    return <PageLoader />;
   }
 
   return (
