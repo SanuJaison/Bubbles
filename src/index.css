@@ -3,7 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: "Outfit", "Basic", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   --color-ink: #2b2440;
   --color-muted: #7c7895;
@@ -80,6 +80,15 @@ body {
     rgba(232, 101, 155, 0.12) 45%,
     transparent 70%
   );
+}
+
+.landing-page :where(a, button):focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 3px;
+}
+
+.dark .landing-page :where(a, button):focus-visible {
+  outline-color: var(--color-brand-400);
 }
 
 .brand-text {

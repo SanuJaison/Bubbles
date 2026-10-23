@@ -23,7 +23,7 @@ import {
   LuWifi,
 } from "react-icons/lu";
 
-const LOGO = "/bubbles-logo.png";
+const LOGO = "/bubbles-logo-72.png";
 
 const LogoMark = ({ size = "h-7 w-7" }) => (
   <span

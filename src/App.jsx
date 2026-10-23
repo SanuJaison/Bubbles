@@ -1,17 +1,38 @@
+import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import VerifyEmail from "./pages/VerifyEmail";
-import Privacy from "./pages/Privacy";
-import Terms from "./pages/Terms";
-import ChooseUsername from "./pages/ChooseUsername";
-import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CallOverlay from "./components/CallOverlay";
+import PageLoader from "./components/PageLoader";
+import { useCall } from "./context/CallContext";
+
+// The public landing page stays in the initial bundle so it paints without a
+// second round trip. Everything behind auth is split into its own chunk.
+const Home = lazy(() => import("./pages/Home"));
+const Register = lazy(() => import("./pages/Register"));
+const Login = lazy(() => import("./pages/Login"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Feedback = lazy(() => import("./pages/Feedback"));
+const ChooseUsername = lazy(() => import("./pages/ChooseUsername"));
+const CallOverlay = lazy(() => import("./components/CallOverlay"));
+
+const CallOverlayGate = () => {
+  const { call } = useCall();
+
+  if (!call) {
+    return null;
+  }
+
+  return (
+    <Suspense fallback={null}>
+      <CallOverlay />
+    </Suspense>
+  );
+};
 
 function App() {
   return (
@@ -45,28 +66,31 @@ function App() {
           },
         }}
       />
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute fallback={<Landing />}>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/verify-email/:token" element={<VerifyEmail />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/choose-username" element={<ChooseUsername />} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute fallback={<Landing />}>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/verify-email/:token" element={<VerifyEmail />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/feedback" element={<Feedback />} />
+          <Route path="/choose-username" element={<ChooseUsername />} />
+        </Routes>
+      </Suspense>
 
-      <CallOverlay />
+      <CallOverlayGate />
     </>
   );
 }

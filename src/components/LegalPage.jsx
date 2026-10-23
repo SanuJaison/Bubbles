@@ -35,6 +35,10 @@ const LegalPage = ({ title, updated, children }) => (
         <Link to="/terms" className="hover:text-brand-600">
           Terms
         </Link>
+        <span className="mx-2">·</span>
+        <Link to="/feedback" className="hover:text-brand-600">
+          Feedback
+        </Link>
       </div>
     </div>
   </div>

@@ -32,6 +32,10 @@ export const resendVerificationAPI = async (reqBody) => {
     return await commonAPI("POST", "users/resend-verification", reqBody);
 };
 
+export const submitFeedbackAPI = async (reqBody) => {
+    return await commonAPI("POST", "feedback", reqBody);
+};
+
 export const getUserProfileAPI = async (reqHeader) => {
     return await commonAPI("GET", "users/profile", "", reqHeader);
 }

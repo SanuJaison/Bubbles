@@ -13,6 +13,10 @@ const PublicFooter = () => (
     <Link to="/terms" className="hover:text-brand-600">
       Terms
     </Link>
+    <span>·</span>
+    <Link to="/feedback" className="hover:text-brand-600">
+      Feedback
+    </Link>
   </div>
 );
 

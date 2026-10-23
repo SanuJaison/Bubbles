@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   LuArrowRight,
@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: "#preview", label: "Preview" },
   { href: "#download", label: "Download" },
   { href: "#faq", label: "FAQ" },
+  { to: "/feedback", label: "Feedback" },
 ];
 
 const ThemeButton = () => {
@@ -42,6 +43,35 @@ const ThemeButton = () => {
 const LandingNav = () => {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const handleChange = (event) => {
+      if (event.matches) {
+        setOpen(false);
+      }
+    };
+
+    desktop.addEventListener("change", handleChange);
+
+    return () => desktop.removeEventListener("change", handleChange);
+  }, []);
+
   return (
     <header className="glass sticky top-0 z-50 border-b border-brand-100/60">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -52,7 +82,10 @@ const LandingNav = () => {
         >
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#ffffff] p-1 shadow-sm">
             <img
-              src="/bubbles-logo.png"
+              src="/bubbles-logo-72.png"
+              srcSet="/bubbles-logo-72.png 1x, /bubbles-logo-144.png 2x"
+              width="36"
+              height="36"
               alt=""
               className="h-full w-full object-contain"
               decoding="async"
@@ -62,16 +95,26 @@ const LandingNav = () => {
           <span className="brand-text text-xl font-bold">Bubbles</span>
         </Link>
 
-        <nav className="hidden items-center gap-7 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-muted transition hover:text-brand-600"
-            >
-              {link.label}
-            </a>
-          ))}
+        <nav aria-label="Primary" className="hidden items-center gap-7 lg:flex">
+          {NAV_LINKS.map((link) =>
+            link.to ? (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="text-sm font-medium text-muted transition hover:text-brand-600"
+              >
+                {link.label}
+              </Link>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-muted transition hover:text-brand-600"
+              >
+                {link.label}
+              </a>
+            ),
+          )}
         </nav>
 
         <div className="hidden items-center gap-2 lg:flex">
@@ -118,17 +161,28 @@ const LandingNav = () => {
           id="landing-mobile-menu"
           className="border-t border-brand-100/60 bg-brand-50/95 px-4 py-4 backdrop-blur-xl lg:hidden"
         >
-          <nav className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-white/60 hover:text-brand-600"
-              >
-                {link.label}
-              </a>
-            ))}
+          <nav aria-label="Mobile" className="flex flex-col gap-1">
+            {NAV_LINKS.map((link) =>
+              link.to ? (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-white/60 hover:text-brand-600"
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setOpen(false)}
+                  className="rounded-xl px-3 py-2.5 text-sm font-medium text-muted transition hover:bg-white/60 hover:text-brand-600"
+                >
+                  {link.label}
+                </a>
+              ),
+            )}
           </nav>
 
           <div className="mt-3 grid gap-2 border-t border-brand-100/60 pt-3">

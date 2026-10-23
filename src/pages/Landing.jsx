@@ -135,7 +135,7 @@ const FAQS = [
   {
     question: "How do I report a bug?",
     answer:
-      "Use the contact details on the Privacy Policy page. Include what you were doing and what went wrong.",
+      "Open the Feedback page from the navigation. Include what you were doing and what went wrong, and leave an email if you would like a reply.",
   },
 ];
 
@@ -315,10 +315,11 @@ const FaqItem = ({ question, answer, open, onToggle }) => {
     <div className="glass-strong rounded-2xl border border-brand-100/70 p-5 shadow-soft">
       <button
         type="button"
+        id={`${panelId}-button`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={onToggle}
-        className="flex w-full cursor-pointer items-center justify-between gap-4 text-left text-sm font-semibold text-ink focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 text-left text-sm font-semibold text-ink"
       >
         {question}
         <LuChevronDown
@@ -330,6 +331,8 @@ const FaqItem = ({ question, answer, open, onToggle }) => {
 
       <div
         id={panelId}
+        role="region"
+        aria-labelledby={`${panelId}-button`}
         aria-hidden={!open}
         className={`grid transition-all duration-300 ease-out ${
           open
@@ -348,6 +351,7 @@ const FaqItem = ({ question, answer, open, onToggle }) => {
 const FloatingMessageCard = () => (
   <div
     data-float
+    aria-hidden="true"
     className="glass-strong absolute top-8 -left-4 hidden items-center gap-2 rounded-2xl border border-brand-100/70 px-3 py-2 shadow-soft xl:flex"
   >
     <Avatar
@@ -368,6 +372,7 @@ const FloatingMessageCard = () => (
 const FloatingAiCard = () => (
   <div
     data-float
+    aria-hidden="true"
     className="glass-strong absolute bottom-16 -left-6 hidden w-[210px] rounded-2xl border border-brand-100/70 p-3 shadow-soft xl:block"
   >
     <div className="flex items-center gap-2">
@@ -399,6 +404,10 @@ const Landing = () => {
   });
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+
     const previous = document.documentElement.style.scrollBehavior;
 
     document.documentElement.style.scrollBehavior = "smooth";
@@ -409,7 +418,18 @@ const Landing = () => {
   }, []);
 
   return (
-    <div id="top" ref={rootRef} className="relative min-h-screen text-ink">
+    <div
+      id="top"
+      ref={rootRef}
+      className="landing-page relative min-h-screen text-ink"
+    >
+      <a
+        href="#main-content"
+        className="sr-only rounded-xl bg-white px-4 py-2 text-sm font-semibold text-ink shadow-soft focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[60]"
+      >
+        Skip to content
+      </a>
+
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
@@ -437,7 +457,7 @@ const Landing = () => {
 
       <LandingNav />
 
-      <main className="relative z-10">
+      <main id="main-content" tabIndex={-1} className="relative z-10">
         <section className="relative isolate overflow-hidden">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div
@@ -551,12 +571,13 @@ const Landing = () => {
             >
               <div className="absolute -inset-6 -z-10 rounded-[44px] bg-linear-to-br from-brand-200/50 via-blush-300/30 to-coral-300/40 blur-2xl" />
 
-              <div data-tilt className="relative">
+              <div data-tilt aria-hidden="true" className="relative">
                 <DesktopPreview />
               </div>
 
               <div
                 data-float
+                aria-hidden="true"
                 className="absolute -right-2 -bottom-8 hidden w-[185px] sm:block lg:-right-6 lg:w-[205px]"
               >
                 <PhonePreview compact />
@@ -646,7 +667,9 @@ const Landing = () => {
                   Desktop web app
                 </div>
 
-                <DesktopPreview />
+                <div aria-hidden="true">
+                  <DesktopPreview />
+                </div>
               </div>
 
               <div data-reveal className="flex flex-col items-center">
@@ -661,7 +684,9 @@ const Landing = () => {
                   </span>
                 </div>
 
-                <PhonePreview />
+                <div aria-hidden="true">
+                  <PhonePreview />
+                </div>
 
                 <p className="mt-4 max-w-[250px] text-center text-xs leading-5 text-muted">
                   Chats, groups, voice notes, and notifications first. Call
@@ -789,6 +814,37 @@ const Landing = () => {
                   }
                 />
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="pb-6 sm:pb-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div
+              data-reveal
+              className="flex flex-col gap-5 rounded-3xl border border-brand-100/70 bg-brand-50/40 p-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:p-6"
+            >
+              <div className="flex items-start gap-3">
+                <span className="brand-gradient flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm">
+                  <LuMessageCircle className="text-lg" />
+                </span>
+
+                <div>
+                  <p className="font-semibold">Have an idea or found a bug?</p>
+                  <p className="mt-1 text-sm leading-6 text-muted">
+                    Tell us what would make Bubbles better. Every message helps
+                    shape what comes next.
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                to="/feedback"
+                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-brand-200/80 bg-white/70 px-4 py-2.5 text-sm font-semibold text-ink transition hover:border-brand-400"
+              >
+                Share feedback
+                <LuArrowRight />
+              </Link>
             </div>
           </div>
         </section>

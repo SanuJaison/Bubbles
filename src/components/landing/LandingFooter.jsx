@@ -9,7 +9,10 @@ const LandingFooter = () => (
           <Link to="/" className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#ffffff] p-1 shadow-sm">
               <img
-                src="/bubbles-logo.png"
+                src="/bubbles-logo-72.png"
+                srcSet="/bubbles-logo-72.png 1x, /bubbles-logo-144.png 2x"
+                width="36"
+                height="36"
                 alt=""
                 className="h-full w-full object-contain"
                 decoding="async"
@@ -69,6 +72,11 @@ const LandingFooter = () => (
             <li>
               <Link to="/terms" className="transition hover:text-brand-600">
                 Terms of Service
+              </Link>
+            </li>
+            <li>
+              <Link to="/feedback" className="transition hover:text-brand-600">
+                Feedback
               </Link>
             </li>
             <li>

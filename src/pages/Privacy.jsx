@@ -10,7 +10,7 @@ const Privacy = () => {
   });
 
   return (
-    <LegalPage title="Privacy Policy" updated="October 22, 2026">
+    <LegalPage title="Privacy Policy" updated="October 23, 2026">
       <p>
         Bubbles is a messaging application for one-to-one chats, group
         conversations, calls, and AI-assisted features. This policy explains what
@@ -41,6 +41,12 @@ const Privacy = () => {
         <strong>Preferences.</strong> We store settings such as your theme,
         wallpaper, notification choices, and privacy preferences.
       </p>
+      <p>
+        <strong>Feedback you send.</strong> If you use the feedback form, we
+        collect your message, the category you choose, the page you sent it
+        from, and any name or email address you choose to provide. An email
+        address is optional and is only used to follow up about your feedback.
+      </p>
 
       <h2>2. How we use information</h2>
       <ul>
@@ -49,6 +55,7 @@ const Privacy = () => {
         <li>Operate calls, file sharing, and AI-assisted features.</li>
         <li>Send verification and password-reset emails.</li>
         <li>Prevent abuse, investigate reports, and enforce our Terms.</li>
+        <li>Review feedback and improve the service.</li>
         <li>Maintain, troubleshoot, and improve the service.</li>
         <li>Comply with legal obligations.</li>
       </ul>

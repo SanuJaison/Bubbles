@@ -3,11 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="referrer" content="no-referrer" />
-    <link rel="icon" type="image/svg+xml" href="/bubbles-logo.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/bubbles-logo-180.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Arimo:ital,wght@0,400..700;1,400..700&family=Basic&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Geist:wght@100..900&family=Geom:ital,wght@0,300..900;1,300..900&family=Iceberg&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Lora:ital,wght@0,400..700;1,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Slab:wght@100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap"
       rel="stylesheet"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,9 +17,22 @@
       content="Bubbles is a real-time chat app for one-to-one and group conversations, voice messages, calls, file sharing, and AI-assisted replies."
     />
     <meta name="robots" content="index, follow" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="application-name" content="Bubbles" />
     <meta name="theme-color" content="#7c3aed" />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#f6f1ff"
+    />
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#0b0b10"
+    />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Bubbles" />
+    <meta property="og:locale" content="en_US" />
     <meta
       property="og:title"
       content="Bubbles | Chat, Calls & AI in One Place"
@@ -32,8 +46,11 @@
       property="og:image"
       content="https://bubbles-zeta-nine.vercel.app/bubbles-logo.png"
     />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="922" />
+    <meta property="og:image:height" content="928" />
     <meta property="og:image:alt" content="Bubbles app icon" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta
       name="twitter:title"
       content="Bubbles | Chat, Calls & AI in One Place"
@@ -42,8 +59,14 @@
       name="twitter:description"
       content="Chat with friends and groups, send voice messages, make calls, share files, and get AI-assisted replies in Bubbles."
     />
+    <meta
+      name="twitter:image"
+      content="https://bubbles-zeta-nine.vercel.app/bubbles-logo.png"
+    />
+    <meta name="twitter:image:alt" content="Bubbles app icon" />
     <title>Bubbles | Chat, Calls & AI in One Place</title>
     <link rel="canonical" href="https://bubbles-zeta-nine.vercel.app/" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -59,6 +82,78 @@
           "price": "0",
           "priceCurrency": "USD"
         }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Bubbles free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Bubbles is free to use. It started as a personal project, and anyone is welcome to use it."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Do I need an account?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. You can sign up with email or Google. New email accounts need to verify their address before signing in."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Are calls available?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Voice and video calls work in the web app today. The Android app will show the call buttons from the first release; mobile calling is coming in a later update."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I use Bubbles on my phone now?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes. Open the web app in your mobile browser. The native Android app is in development."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How will I install the Android app?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "When the APK is released, download it, open it, and allow installs from your browser if Android asks. The Play Store release can come later."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Will there be an iOS app?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Maybe later. iOS builds need a Mac and an Apple Developer account, so Android and Windows come first."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is my data private?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Your chats are only shown to the people in the conversation. Read the Privacy Policy for the full details."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How do I report a bug?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Open the Feedback page from the navigation. Include what you were doing and what went wrong, and leave an email if you would like a reply."
+            }
+          }
+        ]
       }
     </script>
     <script>
