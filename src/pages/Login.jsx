@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginAPI } from "../service/api";
+import { serverURL } from "../service/serverURL";
 import { useAuth } from "../context/AuthContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import PageLoader from "../components/PageLoader";
@@ -25,6 +26,7 @@ const Login = () => {
   });
 
   const [rememberMe, setRememberMe] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -40,6 +42,13 @@ const Login = () => {
     }
   }, [loading, navigate, user]);
 
+  useEffect(() => {
+    // Render's free tier sleeps when idle. Wake the API while the user types
+    // so the first login doesn't wait for a cold start.
+    const apiRoot = serverURL.replace(/\/api$/, "");
+    fetch(apiRoot, { method: "GET" }).catch(() => {});
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -49,6 +58,12 @@ const Login = () => {
       toast.error("Please enter your email/username and password");
       return;
     }
+
+    if (submitting) {
+      return;
+    }
+
+    setSubmitting(true);
 
     try {
       const response = await loginAPI({
@@ -86,6 +101,8 @@ const Login = () => {
       }
 
       toast.error(message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -178,9 +195,16 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full brand-gradient text-white font-medium py-3 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-glow cursor-pointer hover:opacity-95 transition"
+              disabled={submitting}
+              className="w-full brand-gradient text-white font-medium py-3 px-6 rounded-2xl flex items-center justify-center gap-3 shadow-glow cursor-pointer hover:opacity-95 transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Login <LuArrowRight className="text-lg" />
+              {submitting ? (
+                "Signing in…"
+              ) : (
+                <>
+                  Login <LuArrowRight className="text-lg" />
+                </>
+              )}
             </button>
           </form>
 

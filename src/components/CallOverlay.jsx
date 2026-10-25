@@ -33,7 +33,8 @@ const ParticipantTile = ({
     }
   }, [stream]);
 
-  const showVideo = isVideo && Boolean(stream) && !(isSelf && cameraOff);
+  const hasVideo = Boolean(stream?.getVideoTracks?.().length);
+  const showVideo = isVideo && hasVideo && !(isSelf && cameraOff);
 
   return (
     <div className="relative flex aspect-video items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/5">
@@ -99,9 +100,8 @@ const CallOverlay = () => {
   // The local <video> only exists once a video call is live, so the effect
   // that attaches the stream has to re-run when it mounts — otherwise the
   // self-view stays black.
-  const isVideoActive = call?.type === "video" && call?.status === "active";
-  const showLocalVideo =
-    call?.type === "video" && (isVideoActive || Boolean(localStream));
+  const localHasVideo = Boolean(localStream?.getVideoTracks?.().length);
+  const showLocalVideo = call?.type === "video" && !cameraOff && localHasVideo;
 
   useEffect(() => {
     if (localVideoRef.current) {
@@ -136,6 +136,8 @@ const CallOverlay = () => {
 
   const isVideo = call.type === "video";
   const isActive = call.status === "active";
+  const remoteHasVideo = Boolean(remoteStream?.getVideoTracks?.().length);
+  const showRemoteVideo = isVideo && isActive && remoteHasVideo;
   const isIncoming = call.direction === "incoming" && call.status === "ringing";
   const remoteUser = call.remoteUser || {};
   const avatar = remoteUser.profilePicture || defaultProfile;
@@ -300,7 +302,14 @@ const CallOverlay = () => {
                 <button
                   type="button"
                   onClick={toggleCamera}
-                  title={cameraOff ? "Turn camera on" : "Turn camera off"}
+                  disabled={!localHasVideo}
+                  title={
+                    !localHasVideo
+                      ? "Camera unavailable"
+                      : cameraOff
+                        ? "Turn camera on"
+                        : "Turn camera off"
+                  }
                   className={`${controlButton} ${
                     cameraOff
                       ? "bg-[#f4f0ff] text-[#2b2440] ring-2 ring-white/40"
@@ -337,7 +346,7 @@ const CallOverlay = () => {
         autoPlay
         playsInline
         className={
-          isVideo && isActive
+          showRemoteVideo
             ? "absolute inset-0 h-full w-full bg-black object-cover"
             : "pointer-events-none absolute h-px w-px opacity-0"
         }
@@ -365,7 +374,7 @@ const CallOverlay = () => {
       )}
 
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center px-6">
-        {!(isVideo && isActive) && (
+        {!showRemoteVideo && (
           <div className="relative flex items-center justify-center">
             {!isActive && (
               <>
@@ -445,7 +454,14 @@ const CallOverlay = () => {
               <button
                 type="button"
                 onClick={toggleCamera}
-                title={cameraOff ? "Turn camera on" : "Turn camera off"}
+                disabled={!localHasVideo}
+                title={
+                  !localHasVideo
+                    ? "Camera unavailable"
+                    : cameraOff
+                      ? "Turn camera on"
+                      : "Turn camera off"
+                }
                 className={`${controlButton} ${
                   cameraOff
                     ? "bg-[#f4f0ff] text-[#2b2440] ring-2 ring-white/40"

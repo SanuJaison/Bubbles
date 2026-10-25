@@ -30,6 +30,40 @@ const ICE_SERVERS = {
 
 const RING_TIMEOUT_MS = 45000;
 
+// getUserMedia throws several very different errors behind the same generic
+// "permission denied" toast. Name the real cause so the next attempt is clear.
+const describeMediaError = (error, type) => {
+  const isVideo = type === "video";
+
+  switch (error?.name) {
+    case "NotAllowedError":
+    case "PermissionDeniedError":
+      return isVideo
+        ? "Camera and microphone permission was denied. Allow both in your browser or system settings."
+        : "Microphone permission was denied. Allow it in your browser or system settings.";
+    case "NotFoundError":
+    case "DevicesNotFoundError":
+      return isVideo
+        ? "No camera or microphone was found. Connect a device and try again."
+        : "No microphone was found. Connect a microphone and try again.";
+    case "NotReadableError":
+    case "TrackStartError":
+      return isVideo
+        ? "The camera or microphone is already in use by another app. Close it and try again."
+        : "The microphone is already in use by another app. Close it and try again.";
+    case "OverconstrainedError":
+      return "The camera doesn't support the requested video settings. Try an audio call.";
+    case "SecurityError":
+      return "Calls require a secure HTTPS connection.";
+    case "AbortError":
+      return "The camera or microphone could not start. Try again.";
+    default:
+      return isVideo
+        ? "Could not start the camera or microphone. Check your device and permissions."
+        : "Could not start the microphone. Check your device and permissions.";
+  }
+};
+
 export const CallProvider = ({ children }) => {
   const { socket } = useSocket();
   const { user } = useAuth();
@@ -213,22 +247,54 @@ export const CallProvider = ({ children }) => {
   );
 
   const getLocalMedia = useCallback(async (type) => {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video:
-        type === "video"
+    const wantsVideo = type === "video";
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: wantsVideo
           ? {
               width: { ideal: 1280 },
               height: { ideal: 720 },
               facingMode: "user",
             }
           : false,
-    });
+      });
 
-    localStreamRef.current = stream;
-    setLocalStream(stream);
+      localStreamRef.current = stream;
+      setLocalStream(stream);
+      setCameraOff(wantsVideo && stream.getVideoTracks().length === 0);
 
-    return stream;
+      return stream;
+    } catch (error) {
+      if (!wantsVideo) {
+        throw error;
+      }
+
+      // A missing, busy, or blocked camera shouldn't kill the call. Fall back
+      // to audio so the other side still connects and the conversation works.
+      const audioStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+
+      localStreamRef.current = audioStream;
+      setLocalStream(audioStream);
+      setCameraOff(true);
+
+      const cameraBlocked =
+        error?.name === "NotAllowedError" ||
+        error?.name === "PermissionDeniedError";
+
+      toast.error(
+        cameraBlocked
+          ? "Camera permission denied — continuing with audio only."
+          : "Camera unavailable — continuing with audio only.",
+        { duration: 6000 },
+      );
+
+      return audioStream;
+    }
   }, []);
 
   // One peer connection per other participant. Whoever joins an ongoing call
@@ -387,8 +453,8 @@ export const CallProvider = ({ children }) => {
         const pc = createPeerConnection(String(userId), callId);
 
         stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-      } catch {
-        toast.error("Microphone or camera permission denied");
+      } catch (error) {
+        toast.error(describeMediaError(error, type));
         cleanup();
         return;
       }
@@ -454,8 +520,8 @@ export const CallProvider = ({ children }) => {
 
       try {
         await getLocalMedia(type);
-      } catch {
-        toast.error("Microphone or camera permission denied");
+      } catch (error) {
+        toast.error(describeMediaError(error, type));
         cleanup();
         return;
       }
@@ -519,8 +585,8 @@ export const CallProvider = ({ children }) => {
 
       try {
         await getLocalMedia(mediaType);
-      } catch {
-        toast.error("Microphone or camera permission denied");
+      } catch (error) {
+        toast.error(describeMediaError(error, mediaType));
         cleanup();
         return;
       }
@@ -556,8 +622,8 @@ export const CallProvider = ({ children }) => {
       const pc = createPeerConnection(remoteId, callId);
 
       stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-    } catch {
-      toast.error("Microphone or camera permission denied");
+    } catch (error) {
+      toast.error(describeMediaError(error, activeCall.type));
       socket?.emit("call:reject", { callId, toUserId: remoteId });
       cleanup();
       return;
