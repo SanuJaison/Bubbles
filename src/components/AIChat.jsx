@@ -80,6 +80,20 @@ const cleanAIText = (value) =>
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 
+const cleanReplySnapshot = (replyTo) => {
+  if (!replyTo || typeof replyTo !== "object") {
+    return null;
+  }
+
+  return {
+    ...replyTo,
+    text:
+      replyTo.type === "ai"
+        ? cleanAIText(replyTo.text)
+        : String(replyTo.text || ""),
+  };
+};
+
 const createGreeting = (name) => [
   {
     id: "bubbles-ai-greeting",
@@ -123,6 +137,7 @@ const loadMessages = (storageKey, name) => {
                   attachment && typeof attachment.name === "string",
               )
             : [],
+          replyTo: cleanReplySnapshot(item.replyTo),
         }));
 
       if (valid.length > 0) {
@@ -160,6 +175,7 @@ const serializeMessages = (messages) =>
           ? attachment.audio
           : "",
     })),
+    replyTo: cleanReplySnapshot(message.replyTo),
   }));
 
 const getAttachmentKind = (file) => {
