@@ -46,7 +46,7 @@ const Login = () => {
     // Render's free tier sleeps when idle. Wake the API while the user types
     // so the first login doesn't wait for a cold start.
     const apiRoot = serverURL.replace(/\/api$/, "");
-    fetch(apiRoot, { method: "GET" }).catch(() => {});
+    fetch(apiRoot, { method: "GET", cache: "no-store" }).catch(() => {});
   }, []);
 
   const handleLogin = async (e) => {
