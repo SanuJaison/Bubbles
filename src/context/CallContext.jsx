@@ -28,7 +28,7 @@ const ICE_SERVERS = {
   ],
 };
 
-const RING_TIMEOUT_MS = 45000;
+const RING_TIMEOUT_MS = 60000;
 
 // getUserMedia throws several very different errors behind the same generic
 // "permission denied" toast. Name the real cause so the next attempt is clear.
@@ -405,7 +405,7 @@ export const CallProvider = ({ children }) => {
       chatId,
       type = "audio",
     }) => {
-      if (!socket) {
+      if (!socket?.connected) {
         toast.error("Still connecting — try again in a second");
         return;
       }
@@ -476,7 +476,7 @@ export const CallProvider = ({ children }) => {
 
   const startGroupCall = useCallback(
     async ({ chatId, name, type = "audio" }) => {
-      if (!socket) {
+      if (!socket?.connected) {
         toast.error("Still connecting — try again in a second");
         return;
       }
@@ -537,7 +537,7 @@ export const CallProvider = ({ children }) => {
 
   const joinGroupCall = useCallback(
     async ({ callId, chatId, name, type = "audio" }) => {
-      if (!socket) {
+      if (!socket?.connected) {
         toast.error("Still connecting — try again in a second");
         return;
       }
@@ -603,6 +603,11 @@ export const CallProvider = ({ children }) => {
       return;
     }
 
+    if (!socket?.connected) {
+      toast.error("Still connecting — try again in a second");
+      return;
+    }
+
     if (activeCall.isGroup) {
       await joinGroupCall({
         callId: activeCall.id,
@@ -617,6 +622,9 @@ export const CallProvider = ({ children }) => {
     const remoteId = String(activeCall.remoteUser.id);
     const callId = activeCall.id;
 
+    // Show progress while the browser asks for camera/microphone permission.
+    setCall((prev) => (prev ? { ...prev, status: "connecting" } : prev));
+
     try {
       const stream = await getLocalMedia(activeCall.type);
       const pc = createPeerConnection(remoteId, callId);
@@ -628,8 +636,6 @@ export const CallProvider = ({ children }) => {
       cleanup();
       return;
     }
-
-    setCall((prev) => (prev ? { ...prev, status: "connecting" } : prev));
 
     socket?.emit("call:accept", { callId, toUserId: remoteId });
   }, [socket, getLocalMedia, createPeerConnection, cleanup, joinGroupCall]);
@@ -891,6 +897,10 @@ export const CallProvider = ({ children }) => {
       }
 
       const activeCall = callRef.current;
+
+      if (activeCall && !activeCall.startedAt) {
+        toast("Call ended before it connected", { icon: "📴" });
+      }
 
       if (activeCall?.direction === "outgoing") {
         reportCall(activeCall.startedAt ? "completed" : "missed");

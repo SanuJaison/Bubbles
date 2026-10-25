@@ -224,6 +224,12 @@ const CallOverlay = () => {
               {call.groupName || "Group call"} ·{" "}
               {call.participantCount || 0} people
             </p>
+
+            {isVideo && (
+              <p className="mt-1 text-xs text-white/55">
+                Allow camera and microphone when prompted.
+              </p>
+            )}
           </div>
         ) : (
           <div className="relative z-10 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
@@ -407,6 +413,12 @@ const CallOverlay = () => {
             </span>
           )}
         </p>
+
+        {isIncoming && isVideo && (
+          <p className="mt-2 text-xs text-white/55">
+            Allow camera and microphone when prompted.
+          </p>
+        )}
 
         {isActive && remoteMuted && (
           <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-xs text-white/90">

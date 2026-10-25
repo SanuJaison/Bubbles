@@ -49,6 +49,13 @@ body {
   background-attachment: fixed;
 }
 
+/* WebView2/Edge adds its own password reveal eye inside the input. Hide it so
+   the app's custom eye button is the only one. */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
 /* Brand gradient pulled from the Bubbles logo. */
 .brand-gradient {
   background-image: linear-gradient(
