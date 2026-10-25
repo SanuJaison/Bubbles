@@ -161,6 +161,51 @@ const getPresenceLabel = (chat) => {
   return "Offline";
 };
 
+// Bubbles AI lives only on this device (localStorage), but once the user has
+// actually chatted with it we surface it in the conversation list like any
+// other contact.
+const AI_CHAT_ID = "bubbles-ai";
+
+const getAIStorageKey = (user) =>
+  `bubblesAIHistory:${user?._id || user?.id || "guest"}`;
+
+const readAIChatSummary = (user) => {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(getAIStorageKey(user)) || "null"
+    );
+
+    if (!Array.isArray(saved)) {
+      return null;
+    }
+
+    const conversation = saved.filter(
+      (item) =>
+        item &&
+        (item.type === "user" || item.type === "ai") &&
+        !item.greeting &&
+        !item.error &&
+        typeof item.text === "string" &&
+        item.text.trim(),
+    );
+
+    if (conversation.length === 0) {
+      return null;
+    }
+
+    const last = conversation[conversation.length - 1];
+    const preview = last.text.replace(/\s+/g, " ").trim();
+
+    return {
+      hasConversation: true,
+      lastMessage: last.type === "user" ? `You: ${preview}` : preview,
+      time: last.time || "",
+    };
+  } catch {
+    return null;
+  }
+};
+
 // Full timestamp used by the "Message info" panel.
 const formatInfoTime = (value) => {
   const date = new Date(value);
@@ -301,6 +346,7 @@ const Home = () => {
   const [createGroupSeed, setCreateGroupSeed] = useState([]);
   const [createGroupKey, setCreateGroupKey] = useState(0);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [aiChatSummary, setAiChatSummary] = useState(null);
   const [loadingChats, setLoadingChats] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -382,6 +428,18 @@ const Home = () => {
   // Read receipts are two-way: with them off you neither broadcast "read"
   // nor see other people's read ticks — messages top out at "delivered".
   const readReceiptsEnabled = authUser?.readReceipts !== false;
+
+  const aiSummaryLoadedRef = useRef(false);
+
+  // Restore the local Bubbles AI conversation into the sidebar on first load.
+  useEffect(() => {
+    if (!authUser || aiSummaryLoadedRef.current) {
+      return;
+    }
+
+    aiSummaryLoadedRef.current = true;
+    setAiChatSummary(readAIChatSummary(authUser));
+  }, [authUser]);
 
   const typingTimeoutRef = useRef(null);
   const isTypingRef = useRef(false);
@@ -813,9 +871,30 @@ const Home = () => {
     return `${names[0]}, ${names[1]} and ${names.length - 2} others are typing...`;
   };
 
+  const aiConversation = aiChatSummary?.hasConversation
+    ? {
+        id: AI_CHAT_ID,
+        name: "Bubbles AI",
+        username: "bubbles-ai",
+        profilePicture: bubbleAI,
+        online: true,
+        isGroup: false,
+        group: false,
+        isAI: true,
+        unread: 0,
+        time: aiChatSummary.time || "",
+        lastMessage: aiChatSummary.lastMessage || "",
+        lastMessageSenderName: "",
+        userId: "",
+      }
+    : null;
+
   // Pinned chats float to the top of the list. Array#sort is stable, so the
   // rest keep the server's newest-first order.
-  const orderedConversations = [...conversations].sort((first, second) => {
+  const orderedConversations = [
+    ...(aiConversation ? [aiConversation] : []),
+    ...conversations,
+  ].sort((first, second) => {
     const firstPinned = pinnedChatIds.includes(String(first.id));
     const secondPinned = pinnedChatIds.includes(String(second.id));
 
@@ -861,18 +940,19 @@ const Home = () => {
   });
 
   const filterCounts = {
-    all: conversations.filter((chat) => !isChatArchived(chat.id)).length,
-    unread: conversations.filter(
+    all: orderedConversations.filter((chat) => !isChatArchived(chat.id)).length,
+    unread: orderedConversations.filter(
       (chat) => !isChatArchived(chat.id) && chat.unread > 0,
     ).length,
-    groups: conversations.filter(
+    groups: orderedConversations.filter(
       (chat) => !isChatArchived(chat.id) && (chat.group || chat.isGroup),
     ).length,
-    favorites: conversations.filter(
+    favorites: orderedConversations.filter(
       (chat) =>
         !isChatArchived(chat.id) && favoriteChatIds.includes(String(chat.id)),
     ).length,
-    archived: conversations.filter((chat) => isChatArchived(chat.id)).length,
+    archived: orderedConversations.filter((chat) => isChatArchived(chat.id))
+      .length,
   };
 
   const isMoreFilterActive =
@@ -2085,6 +2165,29 @@ const Home = () => {
     scrollToBottom();
   }, [currentMessages.length, currentTypingUsers.length, selectedConversation]);
 
+  const handleOpenAI = () => {
+    writeHistoryEntry("ai");
+    setShowAIChat(true);
+    setSelectedConversation(null);
+    localStorage.removeItem("activeChatId");
+
+    setShowProfile(false);
+    setShowNewChat(false);
+    setShowEmojiPicker(false);
+    setShowChatMenu(false);
+    setOpenMessageMenuId(null);
+    setMessageMenuPosition(null);
+
+    setMessage("");
+    setEditingMessageId(null);
+    setReplyingToMessage(null);
+    setSelectedFiles([]);
+
+    cancelRecording();
+
+    setShowMobileSidebar(false);
+  };
+
   const handleConversationClick = async (chatId) => {
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
@@ -2093,6 +2196,11 @@ const Home = () => {
 
     if (socket && selectedConversation) {
       socket.emit("stopTyping", selectedConversation);
+    }
+
+    if (String(chatId) === AI_CHAT_ID) {
+      handleOpenAI();
+      return;
     }
 
     setConversations((prev) =>
@@ -2358,27 +2466,6 @@ const Home = () => {
     } catch (error) {
       console.log("Error creating or getting chat:", error);
     }
-  };
-
-  const handleOpenAI = () => {
-    writeHistoryEntry("ai");
-    setShowAIChat(true);
-
-    setShowProfile(false);
-    setShowNewChat(false);
-    setShowEmojiPicker(false);
-    setShowChatMenu(false);
-    setOpenMessageMenuId(null);
-    setMessageMenuPosition(null);
-
-    setMessage("");
-    setEditingMessageId(null);
-    setReplyingToMessage(null);
-    setSelectedFiles([]);
-
-    cancelRecording();
-
-    setShowMobileSidebar(false);
   };
 
   const handleOpenNewChat = () => {
@@ -3208,6 +3295,32 @@ const Home = () => {
   };
 
   const handleClearChat = () => confirmClearChat(selectedChat);
+
+  const handleClearAIConversation = () => {
+    try {
+      localStorage.removeItem(getAIStorageKey(authUser));
+    } catch {
+      // Ignore storage errors; the in-memory summary still resets.
+    }
+
+    setAiChatSummary(null);
+    setShowAIChat(false);
+    setSelectedConversation(null);
+    localStorage.removeItem("activeChatId");
+    setShowMobileSidebar(true);
+    toast.success("AI chat cleared");
+  };
+
+  const confirmClearAIConversation = () => {
+    requestConfirm({
+      title: "Clear Bubbles AI chat?",
+      message:
+        "This removes your AI conversation from this device. Your regular chats are not affected.",
+      confirmLabel: "Clear chat",
+      tone: "danger",
+      action: handleClearAIConversation,
+    });
+  };
 
   const performDeleteChat = async (chatId = selectedConversation) => {
     const token = localStorage.getItem("token");
@@ -4075,8 +4188,127 @@ const Home = () => {
     }
   };
 
+  const handleOpenForwardAI = (message) => {
+    setForwardTargetMessage({ ...message, isAI: true });
+    setShowForwardModal(true);
+  };
+
+  const forwardAITextToChats = async (text, chatIds) => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Authentication token not found");
+      return;
+    }
+
+    const reqHeader = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    let forwardedCount = 0;
+    let failedCount = 0;
+
+    for (const chatId of chatIds) {
+      try {
+        const formData = new FormData();
+
+        formData.append("chatId", chatId);
+        formData.append("text", text);
+        formData.append("messageType", "text");
+        formData.append("replyTo", "");
+
+        const response = await sendMessageAPI(formData, reqHeader);
+
+        if (response.status === 201) {
+          const savedMessage = response.data.data;
+          const formattedMessage = {
+            id: savedMessage._id,
+            sender: "me",
+            text: savedMessage.text || text,
+            time: formatTime(savedMessage.createdAt),
+            type: "sent",
+            isDelivered: savedMessage.isDelivered || false,
+            isRead: savedMessage.isRead || false,
+            deliveredAt: savedMessage.deliveredAt || null,
+            readAt: savedMessage.readAt || null,
+            isPinned: savedMessage.isPinned || false,
+            pinnedAt: savedMessage.pinnedAt || null,
+            pinnedBy:
+              savedMessage.pinnedBy?._id || savedMessage.pinnedBy || null,
+            pinnedByName: "",
+            sentAt: savedMessage.createdAt,
+            isDeleted: savedMessage.isDeleted || false,
+            isEdited: savedMessage.isEdited || false,
+            senderId: currentUserId,
+            senderName: currentUserName,
+            pending: false,
+            replyTo: null,
+            messageType: savedMessage.messageType || "text",
+            files: savedMessage.files || [],
+          };
+
+          setChatMessages((prev) => ({
+            ...prev,
+            [String(chatId)]: [
+              ...(prev[String(chatId)] || []),
+              formattedMessage,
+            ],
+          }));
+
+          setConversations((prev) => {
+            const existingChat = prev.find(
+              (chat) => String(chat.id) === String(chatId),
+            );
+
+            if (!existingChat) {
+              return prev;
+            }
+
+            return [
+              {
+                ...existingChat,
+                time: formattedMessage.time,
+                lastMessage: formattedMessage.text,
+                unread: 0,
+              },
+              ...prev.filter((chat) => String(chat.id) !== String(chatId)),
+            ];
+          });
+
+          forwardedCount += 1;
+        }
+      } catch {
+        failedCount += 1;
+      }
+    }
+
+    setShowForwardModal(false);
+    setForwardTargetMessage(null);
+
+    if (forwardedCount > 0) {
+      toast.success(
+        `Forwarded to ${forwardedCount} chat${
+          forwardedCount === 1 ? "" : "s"
+        }`,
+      );
+    }
+
+    if (failedCount > 0) {
+      toast.error(
+        `Couldn't forward to ${failedCount} chat${
+          failedCount === 1 ? "" : "s"
+        }`,
+      );
+    }
+  };
+
   const handleForwardMessages = async (chatIds) => {
     if (!forwardTargetMessage) {
+      return;
+    }
+
+    if (forwardTargetMessage.isAI) {
+      await forwardAITextToChats(forwardTargetMessage.text, chatIds);
       return;
     }
 
@@ -4321,9 +4553,12 @@ const Home = () => {
   );
 
   const contextChat = chatContextMenu
-    ? conversations.find(
-        (chat) => String(chat.id) === String(chatContextMenu.chatId),
-      ) || null
+    ? (aiConversation &&
+      String(chatContextMenu.chatId) === AI_CHAT_ID
+        ? aiConversation
+        : conversations.find(
+            (chat) => String(chat.id) === String(chatContextMenu.chatId),
+          )) || null
     : null;
 
   const contextChatArchived = contextChat
@@ -4463,7 +4698,7 @@ const Home = () => {
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">
                     <p className="text-sm text-gray-400">Loading chats...</p>
                   </div>
-                ) : conversations.length === 0 ? (
+                ) : orderedConversations.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center px-4">
                     <div className="w-16 h-16 rounded-full bg-brand-50 flex items-center justify-center text-brand-500 text-2xl mb-4">
                       💬
@@ -4486,7 +4721,7 @@ const Home = () => {
                           ? "👥"
                           : activeFilter === "archived" ||
                               (activeFilter === "all" &&
-                                conversations.length > 0 &&
+                                orderedConversations.length > 0 &&
                                 filterCounts.all === 0)
                             ? "🗄️"
                             : "⭐"}
@@ -4500,7 +4735,7 @@ const Home = () => {
                           : activeFilter === "archived"
                             ? "No archived chats"
                             : activeFilter === "all" &&
-                                conversations.length > 0 &&
+                                orderedConversations.length > 0 &&
                                 filterCounts.all === 0
                               ? "All chats are archived"
                               : "No favorites yet"}
@@ -4514,7 +4749,7 @@ const Home = () => {
                           : activeFilter === "archived"
                             ? "Right-click a chat and choose Archive chat to stash it here."
                             : activeFilter === "all" &&
-                                conversations.length > 0 &&
+                                orderedConversations.length > 0 &&
                                 filterCounts.all === 0
                               ? "Open Archived from the filter menu to find them."
                               : "Star a conversation to pin it here."}
@@ -4523,9 +4758,10 @@ const Home = () => {
                 ) : (
                   <div className="space-y-2">
                     {filteredConversations.map((chat) => {
-                      const isSelected =
-                        String(chat.id) === String(selectedConversation) &&
-                        !showAIChat;
+                      const isSelected = chat.isAI
+                        ? showAIChat
+                        : String(chat.id) === String(selectedConversation) &&
+                          !showAIChat;
 
                       const isTyping =
                         (typingUsers[String(chat.id)] || []).length > 0 ||
@@ -4712,7 +4948,11 @@ const Home = () => {
             style={{ background: activeWallpaper.background }}
           >
             {showAIChat ? (
-              <AIChat onBack={handleBackToChats} />
+              <AIChat
+                onBack={handleBackToChats}
+                onConversationUpdate={setAiChatSummary}
+                onForwardMessage={handleOpenForwardAI}
+              />
             ) : selectedChat ? (
               <>
                 {/* `relative z-30` keeps the header (and its overflow menu)
@@ -6124,30 +6364,43 @@ const Home = () => {
 
           <div className="my-1 h-px bg-brand-100" />
 
-          <ChatMenuAction
-            icon={<LuEraser />}
-            label="Clear chat"
-            onClick={() => {
-              setChatContextMenu(null);
-              confirmClearChat(contextChat);
-            }}
-            disabled={profileAction === "clear"}
-          />
+          {contextChat.isAI ? (
+            <ChatMenuAction
+              icon={<LuEraser />}
+              label="Clear AI chat"
+              onClick={() => {
+                setChatContextMenu(null);
+                confirmClearAIConversation();
+              }}
+            />
+          ) : (
+            <>
+              <ChatMenuAction
+                icon={<LuEraser />}
+                label="Clear chat"
+                onClick={() => {
+                  setChatContextMenu(null);
+                  confirmClearChat(contextChat);
+                }}
+                disabled={profileAction === "clear"}
+              />
 
-          <ChatMenuAction
-            icon={<LuTrash2 />}
-            label={contextChat.isGroup ? "Delete group" : "Delete chat"}
-            onClick={() => {
-              setChatContextMenu(null);
+              <ChatMenuAction
+                icon={<LuTrash2 />}
+                label={contextChat.isGroup ? "Delete group" : "Delete chat"}
+                onClick={() => {
+                  setChatContextMenu(null);
 
-              if (contextChat.isGroup) {
-                confirmDeleteGroup(contextChat);
-              } else {
-                confirmDeleteChat(contextChat);
-              }
-            }}
-            danger
-          />
+                  if (contextChat.isGroup) {
+                    confirmDeleteGroup(contextChat);
+                  } else {
+                    confirmDeleteChat(contextChat);
+                  }
+                }}
+                danger
+              />
+            </>
+          )}
         </div>
       )}
 
@@ -6155,7 +6408,7 @@ const Home = () => {
         <ForwardModal
           message={forwardTargetMessage}
           conversations={conversations}
-          excludeChatId={selectedConversation}
+          excludeChatId={showAIChat ? null : selectedConversation}
           onClose={() => {
             setShowForwardModal(false);
             setForwardTargetMessage(null);

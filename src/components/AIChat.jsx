@@ -9,6 +9,8 @@ import {
   LuCopy,
   LuMic,
   LuVolume2,
+  LuVolumeX,
+  LuChevronDown,
   LuGlobe,
   LuFileText,
   LuVideo,
@@ -172,7 +174,7 @@ const getAttachmentKind = (file) => {
   return "file";
 };
 
-const AIChat = ({ onBack }) => {
+const AIChat = ({ onBack, onConversationUpdate, onForwardMessage }) => {
   const { resolvedTheme, chatTheme } = useTheme();
   const { user } = useAuth();
 
@@ -187,6 +189,11 @@ const AIChat = ({ onBack }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [speakingMessageId, setSpeakingMessageId] = useState(null);
+  const [openMessageMenuId, setOpenMessageMenuId] = useState(null);
+  const [messageMenuPosition, setMessageMenuPosition] = useState(null);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [deleteMessageTarget, setDeleteMessageTarget] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [emojiPickerPos, setEmojiPickerPos] = useState({
     left: 16,
@@ -265,6 +272,32 @@ const AIChat = ({ onBack }) => {
     [],
   );
 
+  // Keep the chat list in sync with this local conversation. Once the user has
+  // sent a real message, Home can show Bubbles AI as a normal chat row.
+  useEffect(() => {
+    const conversation = messages.filter(
+      (item) =>
+        !item.greeting &&
+        !item.error &&
+        typeof item.text === "string" &&
+        item.text.trim(),
+    );
+
+    if (conversation.length === 0) {
+      onConversationUpdate?.(null);
+      return;
+    }
+
+    const last = conversation[conversation.length - 1];
+    const preview = last.text.replace(/\s+/g, " ").trim();
+
+    onConversationUpdate?.({
+      hasConversation: true,
+      lastMessage: last.type === "user" ? `You: ${preview}` : preview,
+      time: last.time || "",
+    });
+  }, [messages, onConversationUpdate]);
+
   const buildApiMessages = (history) =>
     history
       .filter(
@@ -333,12 +366,20 @@ const AIChat = ({ onBack }) => {
       return;
     }
 
+    const replySnapshot = replyingTo;
     const userMessage = {
       id: createMessageId(),
       type: "user",
       text: displayText,
       time: formatClock(),
       attachments,
+      replyTo: replySnapshot
+        ? {
+            id: replySnapshot.id,
+            text: replySnapshot.text,
+            type: replySnapshot.type,
+          }
+        : null,
     };
 
     const history = [...messages, userMessage];
@@ -347,6 +388,7 @@ const AIChat = ({ onBack }) => {
     setMessage("");
     setSelectedFiles([]);
     setShowEmojiPicker(false);
+    setReplyingTo(null);
 
     const formData = new FormData();
 
@@ -632,33 +674,135 @@ const AIChat = ({ onBack }) => {
     setShowEmojiPicker((prev) => !prev);
   };
 
-  const copyReply = async (text) => {
+  const copyMessage = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success("Reply copied");
+      toast.success("Message copied");
     } catch {
-      toast.error("Couldn't copy the reply");
+      toast.error("Couldn't copy the message");
     }
   };
 
-  const speakReply = (text) => {
+  const closeMessageMenu = () => {
+    setOpenMessageMenuId(null);
+    setMessageMenuPosition(null);
+  };
+
+  const speakReply = (chatMessage) => {
     if (!window.speechSynthesis) {
       toast.error("Speech playback isn't supported in this browser.");
       return;
     }
 
+    // The same speaker button doubles as a stop control while it is reading.
+    if (speakingMessageId === chatMessage.id) {
+      window.speechSynthesis.cancel();
+      setSpeakingMessageId(null);
+      return;
+    }
+
     window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(cleanAIText(text));
+    const messageId = chatMessage.id;
+    const utterance = new SpeechSynthesisUtterance(cleanAIText(chatMessage.text));
 
     utterance.lang = navigator.language || "en-US";
     utterance.rate = 1.02;
+    utterance.onend = () =>
+      setSpeakingMessageId((current) =>
+        current === messageId ? null : current,
+      );
+    utterance.onerror = () =>
+      setSpeakingMessageId((current) =>
+        current === messageId ? null : current,
+      );
+
+    setSpeakingMessageId(messageId);
     window.speechSynthesis.speak(utterance);
+  };
+
+  const openMessageMenu = (event, chatMessage) => {
+    event.stopPropagation();
+
+    if (openMessageMenuId === chatMessage.id) {
+      closeMessageMenu();
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const menuWidth = 208;
+    const menuHeight = 300;
+    const spacing = 8;
+
+    const left = Math.max(
+      spacing,
+      Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - spacing),
+    );
+
+    let top = rect.bottom + 6;
+
+    if (top + menuHeight > window.innerHeight - spacing) {
+      top = Math.max(spacing, rect.top - menuHeight - 6);
+    }
+
+    setOpenMessageMenuId(chatMessage.id);
+    setMessageMenuPosition({ top, left });
+  };
+
+  const handleReplyMessage = (chatMessage) => {
+    closeMessageMenu();
+    setReplyingTo(chatMessage);
+  };
+
+  const handleForwardMessage = (chatMessage) => {
+    closeMessageMenu();
+    onForwardMessage?.(chatMessage);
+  };
+
+  const handleDeleteMessage = (chatMessage) => {
+    closeMessageMenu();
+    setDeleteMessageTarget(chatMessage);
+  };
+
+  const confirmDeleteMessage = () => {
+    if (!deleteMessageTarget) {
+      return;
+    }
+
+    const messageId = deleteMessageTarget.id;
+
+    setMessages((prev) =>
+      prev.filter((chatMessage) => chatMessage.id !== messageId),
+    );
+
+    setDeleteMessageTarget(null);
+    setReplyingTo((current) => (current?.id === messageId ? null : current));
+
+    if (speakingMessageId === messageId) {
+      window.speechSynthesis?.cancel();
+      setSpeakingMessageId(null);
+    }
+
+    toast.success("Message deleted");
+  };
+
+  const showMessageInfo = (chatMessage) => {
+    closeMessageMenu();
+    toast(
+      `${chatMessage.type === "ai" ? "Bubbles AI" : "You"} · ${
+        chatMessage.time || "Now"
+      }`,
+      { icon: "ℹ️" },
+    );
   };
 
   const clearAIChat = () => {
     cancelRecording();
     window.speechSynthesis?.cancel();
+    setSpeakingMessageId(null);
+    setReplyingTo(null);
+    closeMessageMenu();
+    setDeleteMessageTarget(null);
     setMessages(createGreeting(user?.name));
     setMessage("");
     setSelectedFiles([]);
@@ -666,6 +810,9 @@ const AIChat = ({ onBack }) => {
     setShowClearConfirm(false);
     toast.success("AI chat cleared");
   };
+
+  const selectedMenuMessage =
+    messages.find((chatMessage) => chatMessage.id === openMessageMenuId) || null;
 
   return (
     <div
@@ -726,7 +873,10 @@ const AIChat = ({ onBack }) => {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-brand p-4 sm:p-5">
+      <div
+        className="flex-1 overflow-y-auto scrollbar-brand p-4 sm:p-5"
+        onScroll={closeMessageMenu}
+      >
         <div className="flex flex-col gap-4">
           {messages.map((chatMessage) => (
             <div
@@ -753,6 +903,19 @@ const AIChat = ({ onBack }) => {
                         : "bubble-recv shadow-sm backdrop-blur-sm rounded-bl-md"
                   }`}
                 >
+                  {chatMessage.replyTo && (
+                    <div className="mb-2 rounded-lg border-l-2 border-white/70 bg-white/15 px-2.5 py-1.5">
+                      <p className="text-[11px] font-semibold text-white/90">
+                        {chatMessage.replyTo.type === "ai"
+                          ? "Bubbles AI"
+                          : "You"}
+                      </p>
+                      <p className="line-clamp-2 whitespace-pre-wrap break-words text-[11px] text-white/75">
+                        {chatMessage.replyTo.text || "Attachment"}
+                      </p>
+                    </div>
+                  )}
+
                   {chatMessage.attachments?.length > 0 && (
                     <div className="mb-2 flex flex-col gap-2">
                       {chatMessage.attachments.map((attachment, index) => {
@@ -899,7 +1062,7 @@ const AIChat = ({ onBack }) => {
                         <>
                           <button
                             type="button"
-                            onClick={() => copyReply(chatMessage.text)}
+                            onClick={() => copyMessage(chatMessage.text)}
                             title="Copy reply"
                             className="hover:text-brand-500 transition"
                           >
@@ -908,14 +1071,44 @@ const AIChat = ({ onBack }) => {
 
                           <button
                             type="button"
-                            onClick={() => speakReply(chatMessage.text)}
-                            title="Listen to reply"
-                            className="hover:text-brand-500 transition"
+                            onClick={() => speakReply(chatMessage)}
+                            title={
+                              speakingMessageId === chatMessage.id
+                                ? "Stop reading"
+                                : "Listen to reply"
+                            }
+                            className={`transition ${
+                              speakingMessageId === chatMessage.id
+                                ? "text-brand-500 animate-pulse"
+                                : "hover:text-brand-500"
+                            }`}
                           >
-                            <LuVolume2 className="text-[11px]" />
+                            {speakingMessageId === chatMessage.id ? (
+                              <LuVolumeX className="text-[11px]" />
+                            ) : (
+                              <LuVolume2 className="text-[11px]" />
+                            )}
                           </button>
                         </>
                       )}
+
+                    {!chatMessage.greeting && (
+                      <button
+                        type="button"
+                        onClick={(event) =>
+                          openMessageMenu(event, chatMessage)
+                        }
+                        title="Message options"
+                        aria-label="Message options"
+                        className={`transition ${
+                          chatMessage.type === "user"
+                            ? "hover:text-white"
+                            : "hover:text-brand-500"
+                        }`}
+                      >
+                        <LuChevronDown className="text-[13px]" />
+                      </button>
+                    )}
                   </span>
                 </div>
               </div>
@@ -980,6 +1173,29 @@ const AIChat = ({ onBack }) => {
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-500" />
             Transcribing your voice message...
           </p>
+        )}
+
+        {replyingTo && (
+          <div className="mb-2 flex items-center justify-between gap-2 rounded-xl border-l-2 border-brand-500 bg-white/70 px-3 py-2 dark:bg-white/5">
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-brand-600">
+                Replying to{" "}
+                {replyingTo.type === "ai" ? "Bubbles AI" : "You"}
+              </p>
+              <p className="truncate text-xs text-muted">
+                {replyingTo.text || "Attachment"}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setReplyingTo(null)}
+              title="Cancel reply"
+              className="shrink-0 text-xs text-muted hover:text-red-500"
+            >
+              Cancel
+            </button>
+          </div>
         )}
 
         {isRecording ? (
@@ -1129,6 +1345,85 @@ const AIChat = ({ onBack }) => {
         )}
       </div>
 
+      {openMessageMenuId && messageMenuPosition && selectedMenuMessage && (
+        <>
+          <div className="fixed inset-0 z-[205]" onClick={closeMessageMenu} />
+
+          <div
+            onClick={(event) => event.stopPropagation()}
+            style={{
+              top: messageMenuPosition.top,
+              left: messageMenuPosition.left,
+            }}
+            className="fixed z-[210] w-52 max-h-[calc(100dvh-16px)] overflow-y-auto scrollbar-brand rounded-xl glass-strong border border-brand-100 shadow-soft py-1 text-ink"
+          >
+            <button
+              type="button"
+              onClick={() => showMessageInfo(selectedMenuMessage)}
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50"
+            >
+              Message info
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                closeMessageMenu();
+                copyMessage(selectedMenuMessage.text);
+              }}
+              disabled={!selectedMenuMessage.text}
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50 disabled:opacity-50"
+            >
+              Copy
+            </button>
+
+            {selectedMenuMessage.type === "ai" &&
+              !selectedMenuMessage.error && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMessageMenu();
+                    speakReply(selectedMenuMessage);
+                  }}
+                  className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50"
+                >
+                  {speakingMessageId === selectedMenuMessage.id
+                    ? "Stop reading"
+                    : "Listen to reply"}
+                </button>
+              )}
+
+            <button
+              type="button"
+              onClick={() => handleReplyMessage(selectedMenuMessage)}
+              className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50"
+            >
+              Reply
+            </button>
+
+            {!selectedMenuMessage.error && (
+              <button
+                type="button"
+                onClick={() => handleForwardMessage(selectedMenuMessage)}
+                className="w-full px-4 py-2.5 text-left text-sm hover:bg-brand-50"
+              >
+                Forward
+              </button>
+            )}
+
+            <div className="my-1 h-px bg-brand-100" />
+
+            <button
+              type="button"
+              onClick={() => handleDeleteMessage(selectedMenuMessage)}
+              className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-red-50"
+            >
+              Delete
+            </button>
+          </div>
+        </>
+      )}
+
       {showEmojiPicker && (
         <>
           <div
@@ -1174,6 +1469,16 @@ const AIChat = ({ onBack }) => {
         tone="danger"
         onCancel={() => setShowClearConfirm(false)}
         onConfirm={clearAIChat}
+      />
+
+      <ConfirmDialog
+        open={Boolean(deleteMessageTarget)}
+        title="Delete message?"
+        message="This removes the message from your Bubbles AI conversation on this device."
+        confirmLabel="Delete"
+        tone="danger"
+        onCancel={() => setDeleteMessageTarget(null)}
+        onConfirm={confirmDeleteMessage}
       />
     </div>
   );
