@@ -25,6 +25,7 @@ import { getMessageThemeClass } from "../constants/messageThemes";
 import { chatWithAIAPI, transcribeAudioAPI } from "../service/api";
 import ConfirmDialog from "./ConfirmDialog";
 import AudioMessage from "./AudioMessage";
+import LinkifiedText from "./LinkifiedText";
 import LiveWaveform from "./LiveWaveform";
 import useVoiceRecorder from "../hooks/useVoiceRecorder";
 import { extractWaveform, formatVoiceDuration } from "../utils/voice";
@@ -131,6 +132,7 @@ const loadMessages = (storageKey, name) => {
           text:
             item.type === "ai" ? cleanAIText(item.text) : String(item.text),
           sources: Array.isArray(item.sources) ? item.sources.slice(0, 5) : [],
+          showSources: item.showSources === true,
           attachments: Array.isArray(item.attachments)
             ? item.attachments.filter(
                 (attachment) =>
@@ -360,6 +362,7 @@ const AIChat = ({ onBack, onConversationUpdate, onForwardMessage }) => {
           sources: Array.isArray(response.data?.sources)
             ? response.data.sources.slice(0, 5)
             : [],
+          showSources: response.data?.showSources === true,
         },
       ]);
     } catch (error) {
@@ -931,7 +934,10 @@ const AIChat = ({ onBack, onConversationUpdate, onForwardMessage }) => {
                           : "You"}
                       </p>
                       <p className="line-clamp-2 whitespace-pre-wrap break-words text-[11px] text-white/75">
-                        {chatMessage.replyTo.text || "Attachment"}
+                        <LinkifiedText
+                          text={chatMessage.replyTo.text || "Attachment"}
+                          linkClassName="underline decoration-white/60 underline-offset-2 break-all"
+                        />
                       </p>
                     </div>
                   )}
@@ -1040,11 +1046,15 @@ const AIChat = ({ onBack, onConversationUpdate, onForwardMessage }) => {
 
                   {chatMessage.text && (
                     <p className="text-sm leading-6 whitespace-pre-wrap break-words">
-                      {chatMessage.text}
+                      <LinkifiedText
+                        text={chatMessage.text}
+                        linkClassName="text-brand-600 underline decoration-brand-300/60 underline-offset-2 break-all hover:text-brand-700 dark:text-brand-300"
+                      />
                     </p>
                   )}
 
-                  {chatMessage.sources?.length > 0 && (
+                  {chatMessage.showSources === true &&
+                    chatMessage.sources?.length > 0 && (
                     <div className="mt-2 border-t border-brand-100/60 pt-2 dark:border-white/10">
                       <p className="flex items-center gap-1 text-[11px] font-medium text-muted">
                         <LuGlobe />

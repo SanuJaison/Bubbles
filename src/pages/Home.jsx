@@ -40,6 +40,7 @@ import ForwardModal from "../components/ForwardModal";
 import ConfirmDialog from "../components/ConfirmDialog";
 import ReportDialog from "../components/ReportDialog";
 import AudioMessage from "../components/AudioMessage";
+import LinkifiedText from "../components/LinkifiedText";
 import LiveWaveform from "../components/LiveWaveform";
 import { extractWaveform, formatVoiceDuration } from "../utils/voice";
 import useVoiceRecorder from "../hooks/useVoiceRecorder";
@@ -5438,7 +5439,14 @@ const Home = () => {
                                         <p
                                           className={`text-sm sm:text-base wrap-break-word ${chatMessage.files?.length > 0 ? "mt-2" : ""}`}
                                         >
-                                          {chatMessage.text}
+                                          <LinkifiedText
+                                            text={chatMessage.text}
+                                            linkClassName={
+                                              chatMessage.type === "sent"
+                                                ? "text-white underline decoration-white/60 underline-offset-2 break-all hover:decoration-white"
+                                                : "text-brand-600 underline decoration-brand-300/60 underline-offset-2 break-all hover:text-brand-700 dark:text-brand-300"
+                                            }
+                                          />
                                         </p>
                                       )}
                                     </>
