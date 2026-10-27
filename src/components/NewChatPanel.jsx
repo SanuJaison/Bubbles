@@ -46,10 +46,12 @@ const NewChatPanel = ({
 
   const searchValue = search.toLowerCase().trim();
 
+  // Privacy: the panel starts empty. People only appear once the user types a
+  // search, so opening "New chat" never exposes the full member list.
   const matchesSearch = (user) =>
-    !searchValue ||
-    user.name?.toLowerCase().includes(searchValue) ||
-    user.username?.toLowerCase().includes(searchValue);
+    Boolean(searchValue) &&
+    (user.name?.toLowerCase().includes(searchValue) ||
+      user.username?.toLowerCase().includes(searchValue));
 
   // People the user already has a conversation with, taken from the sidebar.
   const existingUsers = conversations
