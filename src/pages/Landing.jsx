@@ -80,11 +80,11 @@ const FEATURES = [
   },
   {
     icon: LuVideo,
-    title: "Calls on the web",
+    title: "Calls everywhere",
     description:
-      "Start a voice or video call from any conversation, right in your browser.",
+      "Start a voice or video call from any conversation, in your browser or in the Android app.",
     tone: "from-amber-400 to-coral-400",
-    badge: "Android soon",
+    badge: "Web & Android",
   },
   {
     icon: LuPalette,
@@ -110,12 +110,12 @@ const FAQS = [
   {
     question: "Are calls available?",
     answer:
-      "Voice and video calls work in the web app today. The Android app will show the call buttons from the first release; mobile calling is coming in a later update.",
+      "Voice and video calls work in the web app, the Windows app, and the Android app. You need a working internet connection for calls to connect.",
   },
   {
     question: "Can I use Bubbles on my phone now?",
     answer:
-      "Yes. Open the web app in your mobile browser. The native Android app is in development.",
+      "Yes. Download the Android APK from the download section, or open the web app in your phone browser.",
   },
   {
     question: "Is there a Windows app?",
@@ -125,7 +125,7 @@ const FAQS = [
   {
     question: "How will I install the Android app?",
     answer:
-      "When the APK is released, download it, open it, and allow installs from your browser if Android asks. The Play Store release can come later.",
+      "Download the APK, open it, and allow installs from your browser if Android asks. The Play Store release can come later.",
   },
   {
     question: "Will there be an iOS app?",
@@ -404,7 +404,7 @@ const Landing = () => {
   usePageMeta({
     title: "Bubbles | Chat, Calls & AI in One Place",
     description:
-      "Bubbles is a real-time chat app with groups, voice notes, file sharing, AI replies, and web calls. Use it in your browser today, or download the Windows app. The Android app is on the way.",
+      "Bubbles is a real-time chat app with groups, voice notes, file sharing, AI replies, and calls. Use it in your browser today, or download the Windows or Android app.",
     path: "/",
   });
 
@@ -486,7 +486,7 @@ const Landing = () => {
                 className="inline-flex items-center gap-2 rounded-full border border-brand-200/80 bg-brand-50/70 px-3 py-1.5 text-xs font-medium text-brand-700"
               >
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Web app live · Windows app available · Android coming soon
+                Web app live · Windows app available · Android app available
               </span>
 
               <h1
@@ -503,8 +503,8 @@ const Landing = () => {
               >
                 Bubbles brings real-time chats, groups, voice notes, file
                 sharing, AI replies, and calls into one beautifully simple
-                place. Use it in your browser today, or download the Windows
-                app. The Android app is on the way.
+                place. Use it in your browser today, or download the Windows or
+                Android app.
               </p>
 
               <div
@@ -635,10 +635,10 @@ const Landing = () => {
                 </span>
 
                 <div>
-                  <p className="font-semibold">Android app in development</p>
+                  <p className="font-semibold">Android app available</p>
                   <p className="mt-1 text-sm leading-6 text-muted">
-                    Chats, groups, voice notes, and notifications first. Call
-                    buttons will be there from day one; mobile calls follow.
+                    Chats, groups, voice notes, wallpapers, and voice and video
+                    calls — install the APK and sign in with your account.
                   </p>
                 </div>
               </div>
@@ -685,7 +685,7 @@ const Landing = () => {
                   </span>
 
                   <span className="rounded-full border border-brand-100/70 bg-brand-50/70 px-2 py-0.5 text-[10px] font-semibold text-brand-600">
-                    Calls coming soon
+                    Voice and video calls
                   </span>
                 </div>
 
@@ -694,8 +694,8 @@ const Landing = () => {
                 </div>
 
                 <p className="mt-4 max-w-[250px] text-center text-xs leading-5 text-muted">
-                  Chats, groups, voice notes, and notifications first. Call
-                  buttons are visible in the app; Android calls are coming next.
+                  Chats, groups, voice notes, wallpapers, and voice and video
+                  calls — all in the Android APK.
                 </p>
               </div>
             </div>
@@ -707,7 +707,7 @@ const Landing = () => {
             <SectionHeading
               eyebrow="Take Bubbles with you"
               title="Download Bubbles"
-              description="Download the Windows app today, or keep using Bubbles in your browser. The Android app is still in development — its download button will go live when the first APK is ready."
+              description="Download the Windows or Android app, or keep using Bubbles in your browser. The Android APK is published on GitHub Releases."
             />
 
             <div
@@ -737,8 +737,8 @@ const Landing = () => {
                 href={DOWNLOAD_LINKS.android}
                 points={[
                   "Chats, groups, and voice notes",
-                  "Push notifications planned",
-                  "Call icons included; calls coming soon",
+                  "Voice and video calls",
+                  "Wallpapers, pins, and group tools",
                 ]}
               />
 
@@ -759,10 +759,9 @@ const Landing = () => {
               </InfoCard>
 
               <InfoCard icon={LuSmartphone} title="Install on Android">
-                When the APK is available, download it and open it. If Android
-                asks, allow installs from your browser or file manager. The
-                first build focuses on chats and notifications; calls follow in
-                a later update.
+                Download the APK and open it. If Android asks, allow installs
+                from your browser or file manager. Voice and video calls are
+                included, so sign in with the same account you use on the web.
               </InfoCard>
             </div>
 
@@ -780,9 +779,9 @@ const Landing = () => {
                   v{APP_VERSION} · {RELEASE_DATE}
                 </span>
                 <br />
-                Web app live. Windows desktop app available. Android in
-                development. Next: auto-updates, push notifications, and Android
-                calls.
+                Web app live. Windows desktop app available. Android APK
+                available with voice and video calls. Next: auto-updates and
+                push notifications.
               </InfoCard>
 
               <InfoCard icon={LuShieldCheck} title="Checksums & updates">
@@ -874,8 +873,8 @@ const Landing = () => {
                 </h2>
 
                 <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-white/80 sm:text-base">
-                  Open Bubbles in your browser now, or download the Windows app.
-                  The Android app is on the way.
+                  Open Bubbles in your browser now, or download the Windows or
+                  Android app.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

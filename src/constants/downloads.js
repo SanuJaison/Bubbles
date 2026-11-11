@@ -9,5 +9,8 @@ export const DOWNLOAD_LINKS = {
     import.meta.env.VITE_WINDOWS_DOWNLOAD_URL ||
     "https://github.com/SanuJaison/Bubbles/releases/latest"
   ).trim(),
-  android: (import.meta.env.VITE_ANDROID_DOWNLOAD_URL || "").trim(),
+  android: (
+    import.meta.env.VITE_ANDROID_DOWNLOAD_URL ||
+    "https://github.com/SanuJaison/Bubbles-Mobile/releases/latest"
+  ).trim(),
 };
