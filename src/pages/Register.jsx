@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerAPI } from "../service/api";
+import { useAuth } from "../context/AuthContext.jsx";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import PublicFooter from "../components/PublicFooter";
 import { getDeviceId } from "../utils/deviceId";
@@ -28,6 +29,7 @@ const Register = () => {
   });
 
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -56,13 +58,28 @@ const Register = () => {
       });
 
       if (response.status === 201) {
-        toast.success("Account created. Check your email to verify it.");
+        const { token, user } = response.data;
+
         setUserData({
           name: "",
           username: "",
           email: "",
           password: "",
         });
+
+        // Email confirmation is switched off, so the account is ready to use
+        // straight away and the person lands in their conversations.
+        if (token && user) {
+          login(token, user);
+          toast.success("Welcome to Bubbles!");
+
+          navigate(user.needsUsername ? "/choose-username" : "/", {
+            replace: true,
+          });
+          return;
+        }
+
+        toast.success("Account created. Check your email to verify it.");
         navigate(`/verify-email?email=${encodeURIComponent(email)}`, {
           replace: true,
         });
@@ -166,7 +183,7 @@ const Register = () => {
             </p>
 
             <p className="text-xs text-muted -mt-2">
-              We&apos;ll email you a link to verify your address.
+              You&apos;re all set the moment you create the account.
             </p>
 
             <button
@@ -183,13 +200,6 @@ const Register = () => {
             Already have an account?{" "}
             <Link to={"/login"} className="text-brand-600">
               Log in
-            </Link>
-          </p>
-
-          <p className="text-sm text-muted mt-2">
-            Need to verify your email?{" "}
-            <Link to={"/verify-email"} className="text-brand-600">
-              Resend the link
             </Link>
           </p>
 
