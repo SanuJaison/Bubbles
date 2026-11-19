@@ -61,6 +61,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
   const [resetNotice, setResetNotice] = useState("");
   const [resetError, setResetError] = useState("");
   const [manualResetUrl, setManualResetUrl] = useState("");
+  const [resetReason, setResetReason] = useState("");
 
   useEffect(() => {
     if (!userId) {
@@ -85,6 +86,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
       setResetNotice("");
       setResetError("");
       setManualResetUrl("");
+      setResetReason("");
 
       try {
         const response = await getAdminUserAPI(userId, {
@@ -179,6 +181,7 @@ const AdminUserDrawer = ({ userId, onClose }) => {
           "The reset link could not be sent.",
       );
       setManualResetUrl(requestError.response?.data?.resetUrl || "");
+      setResetReason(requestError.response?.data?.reason || "");
     } finally {
       setResetting(false);
     }
@@ -413,6 +416,12 @@ const AdminUserDrawer = ({ userId, onClose }) => {
                         Copy link
                       </button>
                     </div>
+                  ) : null}
+
+                  {resetReason ? (
+                    <p className="mt-2 text-[11px] leading-5 text-slate-400 dark:text-slate-500">
+                      Relay: {resetReason}
+                    </p>
                   ) : null}
                 </div>
               </section>
