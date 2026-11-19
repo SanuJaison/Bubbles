@@ -37,6 +37,16 @@ export const getAdminUserAPI = async (userId, reqHeader) => {
   return await commonAPI("GET", `admin/users/${userId}`, "", reqHeader);
 };
 
+// Sends the user a reset link. The admin never sees or sets the password.
+export const sendAdminPasswordResetAPI = async (userId, reqHeader) => {
+  return await commonAPI(
+    "POST",
+    `admin/users/${userId}/password-reset`,
+    "",
+    reqHeader,
+  );
+};
+
 export const getAdminFeedbackAPI = async (params, reqHeader) => {
   return await commonAPI(
     "GET",
